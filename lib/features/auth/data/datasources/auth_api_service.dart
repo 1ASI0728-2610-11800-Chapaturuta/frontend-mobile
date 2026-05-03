@@ -9,7 +9,7 @@ class AuthApiService {
   Future<AuthUserModel> login(String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/sign-in'), 
+        Uri.parse('$baseUrl/authentication/sign-in'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -37,18 +37,20 @@ class AuthApiService {
     required String email,
     required String password,
     required String name,
+    int role = 0, // 0=Traveller, 1=TransportManager, 2=Driver, 3=Admin
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/sign-up'), // CAMBIADO
+        Uri.parse('$baseUrl/authentication/sign-up'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
         body: json.encode({
+          'username': name,
           'email': email,
           'password': password,
-          'name': name,
+          'role': role,
         }),
       );
 
@@ -66,7 +68,7 @@ class AuthApiService {
   Future<void> logout(String token) async {
     try {
       await http.post(
-        Uri.parse('$baseUrl/auth/logout'),
+        Uri.parse('$baseUrl/authentication/logout'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

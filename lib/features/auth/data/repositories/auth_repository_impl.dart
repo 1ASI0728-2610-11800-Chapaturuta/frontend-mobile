@@ -19,14 +19,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AuthUser> register(String email, String password, String name) async {
-    final user = await apiService.register(
+  Future<AuthUser> register(String email, String password, String name, {int role = 0}) async {
+    // sign-up backend solo retorna {message}: no incluye token/id/role.
+    // Hacemos login automatico para obtener una sesion completa.
+    await apiService.register(
       email: email,
       password: password,
       name: name,
+      role: role,
     );
-    await saveUser(user);
-    return user;
+    final user = await apiService.login(email, password);
+    final enriched = AuthUserModel(
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      token: user.token,
+      refreshToken: user.refreshToken,
+      role: user.role == 0 ? role : user.role,
+    );
+    await saveUser(enriched);
+    return enriched;
   }
 
   @override
@@ -68,6 +80,7 @@ class AuthRepositoryImpl implements AuthRepository {
       name: user.name,
       token: user.token,
       refreshToken: user.refreshToken,
+      role: user.role,
     );
     await prefs.setString(_authKey, json.encode(userModel.toJson()));
   }

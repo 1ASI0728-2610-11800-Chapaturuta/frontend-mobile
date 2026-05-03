@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/user_repository.dart';
+import '../../data/models/user_model.dart';
 
 class UserProvider with ChangeNotifier {
   final UserRepository repository;
@@ -45,6 +46,24 @@ class UserProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> setCompanyId(int companyId) async {
+    final user = _currentUser;
+    if (user == null || user.companyId == companyId) return;
+
+    final updated = UserModel(
+      id: user.id,
+      name: user.name,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      gender: user.gender,
+      favoriteRoutes: user.favoriteRoutes,
+      companyId: companyId,
+    );
+    await updateUser(updated);
   }
 
   Future<void> logout() async {

@@ -46,13 +46,13 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> register(String email, String password, String name) async {
+  Future<bool> register(String email, String password, String name, {int role = 0}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _currentUser = await repository.register(email, password, name);
+      _currentUser = await repository.register(email, password, name, role: role);
       _isAuthenticated = true;
       _isLoading = false;
       notifyListeners();

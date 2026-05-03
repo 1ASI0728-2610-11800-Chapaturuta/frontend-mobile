@@ -5,7 +5,8 @@ import '../../../profile/data/models/user_model.dart';
 import '../providers/auth_provider.dart';
 import '../../../profile/presentation/providers/user_provider.dart';
 import '../../../routes/presentation/providers/route_provider.dart';
-import '../../../main/presentation/screens/main_screen.dart';
+import '../../../main/presentation/screens/role_router_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -83,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
         if (mounted) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const MainScreen()),
+            MaterialPageRoute(builder: (_) => const RoleRouterScreen()),
           );
         }
       } else if (mounted) {
@@ -284,7 +285,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               const SizedBox(height: 16),
                               Center(
                                 child: TextButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => const RegisterScreen(),
+                                      ),
+                                    );
+                                  },
                                   child: const Text(
                                     '¿No tienes cuenta? Regístrate',
                                     style: TextStyle(color: AppColors.gold300, fontSize: 14),

@@ -4,6 +4,7 @@ class AuthUser {
   final String name;
   final String token;
   final String? refreshToken;
+  final int role;
 
   AuthUser({
     required this.id,
@@ -11,5 +12,6 @@ class AuthUser {
     required this.name,
     required this.token,
     this.refreshToken,
+    this.role = 0,
   });
 }

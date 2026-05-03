@@ -10,19 +10,29 @@ class UserModel extends User {
     required super.phone,
     required super.gender,
     super.favoriteRoutes,
+    super.companyId,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'],
-      name: json['name'],
-      lastName: json['lastName'],
-      username: json['username'],
-      email: json['email'],
-      phone: json['phone'],
-      gender: json['gender'],
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      lastName: json['lastName']?.toString() ?? '',
+      username: json['username']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      gender: json['gender']?.toString() ?? '',
       favoriteRoutes: List<String>.from(json['favoriteRoutes'] ?? []),
+      companyId: _parseInt(json['companyId']),
     );
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   Map<String, dynamic> toJson() {
@@ -35,6 +45,7 @@ class UserModel extends User {
       'phone': phone,
       'gender': gender,
       'favoriteRoutes': favoriteRoutes,
+      'companyId': companyId,
     };
   }
 
@@ -47,6 +58,7 @@ class UserModel extends User {
     String? phone,
     String? gender,
     List<String>? favoriteRoutes,
+    int? companyId,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -57,6 +69,7 @@ class UserModel extends User {
       phone: phone ?? this.phone,
       gender: gender ?? this.gender,
       favoriteRoutes: favoriteRoutes ?? this.favoriteRoutes,
+      companyId: companyId ?? this.companyId,
     );
   }
 }

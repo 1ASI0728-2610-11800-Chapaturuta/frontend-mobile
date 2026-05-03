@@ -14,7 +14,14 @@ import 'features/routes/presentation/providers/route_provider.dart';
 import 'features/profile/data/repositories/user_repository_impl.dart';
 import 'features/profile/presentation/providers/user_provider.dart';
 
-import 'features/main/presentation/screens/main_screen.dart';
+import 'features/company/data/datasources/company_api_service.dart';
+import 'features/company/data/repositories/company_repository_impl.dart';
+import 'features/company/presentation/providers/company_provider.dart';
+import 'features/main/presentation/screens/role_router_screen.dart';
+import 'features/network/routes/data/datasources/company_route_api_service.dart';
+import 'features/network/routes/presentation/providers/company_route_provider.dart';
+import 'features/network/stops/data/datasources/stop_api_service.dart';
+import 'features/network/stops/presentation/providers/stop_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +34,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final routeApiService = RouteApiService();
+    final companyApiService = CompanyApiService();
+    final stopApiService = StopApiService();
+    final companyRouteApiService = CompanyRouteApiService();
 
     return MultiProvider(
       providers: [
@@ -48,6 +58,35 @@ class MyApp extends StatelessWidget {
           update: (context, authProvider, previousRouteProvider) {
             if (authProvider.token != null) {
               routeApiService.setBearerToken(authProvider.token!);
+            }
+            return previousRouteProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, CompanyProvider>(
+          create: (context) => CompanyProvider(
+            repository: CompanyRepositoryImpl(apiService: companyApiService),
+          ),
+          update: (context, authProvider, previousCompanyProvider) {
+            if (authProvider.token != null) {
+              companyApiService.setBearerToken(authProvider.token!);
+            }
+            return previousCompanyProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, StopProvider>(
+          create: (context) => StopProvider(apiService: stopApiService),
+          update: (context, authProvider, previousStopProvider) {
+            if (authProvider.token != null) {
+              stopApiService.setBearerToken(authProvider.token!);
+            }
+            return previousStopProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, CompanyRouteProvider>(
+          create: (context) => CompanyRouteProvider(apiService: companyRouteApiService),
+          update: (context, authProvider, previousRouteProvider) {
+            if (authProvider.token != null) {
+              companyRouteApiService.setBearerToken(authProvider.token!);
             }
             return previousRouteProvider!;
           },
@@ -84,7 +123,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     if (mounted) {
       if (userProvider.currentUser != null) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainScreen()),
+          MaterialPageRoute(builder: (_) => const RoleRouterScreen()),
         );
       } else {
         Navigator.of(context).pushReplacement(

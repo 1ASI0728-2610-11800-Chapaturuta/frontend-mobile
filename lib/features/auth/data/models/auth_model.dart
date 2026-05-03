@@ -7,6 +7,7 @@ class AuthUserModel extends AuthUser {
     required super.name,
     required super.token,
     super.refreshToken,
+    super.role,
   });
 
   factory AuthUserModel.fromJson(Map<String, dynamic> json) {
@@ -16,7 +17,27 @@ class AuthUserModel extends AuthUser {
       name: json['name'] ?? json['username'] ?? '',
       token: json['token'] ?? json['accessToken'] ?? '',
       refreshToken: json['refreshToken'],
+      role: _parseRole(json['role'] ?? json['userRole']),
     );
+  }
+
+  static int _parseRole(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) {
+      final parsed = int.tryParse(value);
+      if (parsed != null) return parsed;
+      switch (value.toLowerCase()) {
+        case 'transportmanager':
+        case 'manager':
+          return 1;
+        case 'driver':
+          return 2;
+        case 'admin':
+          return 3;
+      }
+    }
+    return 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -26,6 +47,7 @@ class AuthUserModel extends AuthUser {
       'name': name,
       'token': token,
       'refreshToken': refreshToken,
+      'role': role,
     };
   }
 }

@@ -7,6 +7,7 @@ class User {
   final String phone;
   final String gender;
   final List<String> favoriteRoutes;
+  final int? companyId;
 
   User({
     required this.id,
@@ -17,6 +18,7 @@ class User {
     required this.phone,
     required this.gender,
     this.favoriteRoutes = const [],
+    this.companyId,
   });
 
   String get fullName => '$name $lastName';

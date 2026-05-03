@@ -15,27 +15,65 @@ class TransportRouteModel extends TransportRoute {
   });
 
   factory TransportRouteModel.fromJson(Map<String, dynamic> json) {
+    // Backend RouteAggregateResource fields:
+    //   id (int), price (double), frequency (int), duration (int minutes),
+    //   isActive (bool), status (string), distanceMeters (decimal?),
+    //   durationSeconds (int?), geometry (string?), stops, schedules
     return TransportRouteModel(
-      id: json['id'] as int,
-      name: json['name'] as String? ?? '',
-      price: _parsePrice(json['price']),
-      duration: json['duration'] as String? ?? '',
-      distance: json['distance'] as String? ?? '',
-      state: json['state'] as String? ?? 'Active',
-      polylineRoute: json['polylineRoute'] as String?,
-      driverId: json['driverId'] as int? ?? 0,
-      originAddress: json['originAddress'] as String?,
-      destinationAddress: json['destinationAddress'] as String?,
+      id: _parseInt(json['id']),
+      name: _asString(json['name'])
+          ?? _buildNameFromStops(json['stops'])
+          ?? '',
+      price: _parseDouble(json['price']),
+      duration: _formatMinutes(json['duration']),
+      distance: _formatMeters(json['distanceMeters'] ?? json['distance']),
+      state: _asString(json['status']) ?? _asString(json['state']) ?? 'Active',
+      polylineRoute: _asString(json['geometry']) ?? _asString(json['polylineRoute']),
+      driverId: _parseInt(json['driverId']),
+      originAddress: _asString(json['originAddress']),
+      destinationAddress: _asString(json['destinationAddress']),
     );
   }
 
-  /// Helper para parsear el precio que viene del backend
-  static double _parsePrice(dynamic price) {
-    if (price == null) return 0.0;
-    if (price is double) return price;
-    if (price is int) return price.toDouble();
-    if (price is String) return double.tryParse(price) ?? 0.0;
+  static int _parseInt(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is double) return v.toInt();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+
+  static double _parseDouble(dynamic v) {
+    if (v == null) return 0.0;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0.0;
     return 0.0;
+  }
+
+  static String? _asString(dynamic v) => v?.toString();
+
+  static String _formatMinutes(dynamic v) {
+    final n = _parseInt(v);
+    if (n <= 0) return '';
+    return '$n min';
+  }
+
+  static String _formatMeters(dynamic v) {
+    final m = _parseDouble(v);
+    if (m <= 0) return '';
+    if (m >= 1000) return '${(m / 1000).toStringAsFixed(1)} km';
+    return '${m.toStringAsFixed(0)} m';
+  }
+
+  static String? _buildNameFromStops(dynamic stops) {
+    if (stops is! List || stops.isEmpty) return null;
+    final first = stops.first;
+    final last = stops.last;
+    final a = first is Map ? _asString(first['name']) : null;
+    final b = last is Map ? _asString(last['name']) : null;
+    if (a == null && b == null) return null;
+    return '${a ?? '?'} - ${b ?? '?'}';
   }
 
   Map<String, dynamic> toJson() {
