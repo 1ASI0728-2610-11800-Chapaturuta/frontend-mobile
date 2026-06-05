@@ -17,11 +17,14 @@ class UserProvider with ChangeNotifier {
   String? get error => _error;
 
   Future<void> loadCurrentUser() async {
-    _isLoading = true;
-    _error = null;
+  _isLoading = true;
+  _error = null;
+  
+  Future.microtask(() {
     notifyListeners();
-
-    try {
+  });
+  
+   try {
       _currentUser = await repository.getCurrentUser();
       _isLoading = false;
       notifyListeners();
