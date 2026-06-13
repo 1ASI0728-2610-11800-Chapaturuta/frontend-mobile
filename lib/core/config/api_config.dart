@@ -1,6 +1,6 @@
 class ApiConfig {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:5027/api',
+    defaultValue: 'https://frock-backend.purplestone-add9d7b8.eastus.azurecontainerapps.io/api',
   );
 }
