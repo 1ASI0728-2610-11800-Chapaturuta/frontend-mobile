@@ -57,6 +57,8 @@ class AuthApiService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final jsonData = json.decode(response.body);
         return AuthUserModel.fromJson(jsonData);
+      } else if (response.statusCode == 409) {
+        throw Exception('El email ya está registrado. Inicia sesión o usa otro correo.');
       } else {
         throw Exception('Error en el registro: ${response.statusCode}');
       }

@@ -22,7 +22,7 @@ class RoleRouterScreen extends StatelessWidget {
       );
     }
 
-    // Conductor (role=2) va al panel de conductor; todo lo demás al panel de pasajero.
+    // Driver (role=2) va al panel de conductor; todo lo demás al panel de pasajero.
     return user.role == 2 ? const DriverMainScreen() : const MainScreen();
   }
 }

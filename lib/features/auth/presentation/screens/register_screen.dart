@@ -19,7 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmCtrl = TextEditingController();
   bool _obscure = true;
   bool _obscureConfirm = true;
-  int _role = 0; // 0=Pasajero, 2=Conductor
+  int _role = 0; // 0=Traveller, 2=Driver
 
   @override
   void dispose() {
@@ -41,6 +41,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
     if (!mounted) return;
     if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text('Cuenta creada exitosamente. Bienvenido/a.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const RoleRouterScreen()),
         (_) => false,

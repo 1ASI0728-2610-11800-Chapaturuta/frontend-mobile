@@ -36,7 +36,7 @@ class AuthUserModel extends AuthUser {
           return 3;
       }
     }
-    return 0;
+    return 0; // default: Traveller
   }
 
   Map<String, dynamic> toJson() {
