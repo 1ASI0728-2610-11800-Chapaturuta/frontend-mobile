@@ -63,6 +63,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           phone: _phoneController.text,
           gender: _selectedGender,
           favoriteRoutes: currentUser.favoriteRoutes,
+          driverId: currentUser.driverId,
+          role: currentUser.role,
         );
         await provider.updateUser(updatedUser);
         if (mounted) {

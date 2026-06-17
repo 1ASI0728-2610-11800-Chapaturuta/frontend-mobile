@@ -51,6 +51,7 @@ class UserRepositoryImpl implements UserRepository {
       gender: user.gender,
       favoriteRoutes: user.favoriteRoutes,
       driverId: user.driverId,
+      role: user.role,
     );
     
     await prefs.setString(_userKey, json.encode(userModel.toJson()));
@@ -82,6 +83,7 @@ class UserRepositoryImpl implements UserRepository {
         gender: user.gender,
         favoriteRoutes: [...user.favoriteRoutes, routeId],
         driverId: user.driverId,
+        role: user.role,
       );
       await _saveUser(updatedUser);
     }
@@ -103,6 +105,7 @@ class UserRepositoryImpl implements UserRepository {
         gender: user.gender,
         favoriteRoutes: updatedRoutes,
         driverId: user.driverId,
+        role: user.role,
       );
       await _saveUser(updatedUser);
     }

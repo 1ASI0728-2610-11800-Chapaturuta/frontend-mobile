@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
+import '../../../profile/data/models/user_model.dart';
+import '../../../profile/presentation/providers/user_provider.dart';
 import '../../../main/presentation/screens/role_router_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -41,6 +43,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
     if (!mounted) return;
     if (ok) {
+      final authUser = auth.currentUser;
+      final userProvider = context.read<UserProvider>();
+      final newUser = UserModel(
+        id: authUser?.id.toString() ?? '1',
+        name: _nameCtrl.text.trim(),
+        lastName: '',
+        username: _emailCtrl.text.split('@')[0],
+        email: _emailCtrl.text.trim(),
+        phone: '',
+        gender: '',
+        favoriteRoutes: [],
+        role: authUser?.role ?? _role,
+      );
+      await userProvider.updateUser(newUser);
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.green,

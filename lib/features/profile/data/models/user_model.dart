@@ -11,6 +11,7 @@ class UserModel extends User {
     required super.gender,
     super.favoriteRoutes,
     super.driverId,
+    super.role,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,7 @@ class UserModel extends User {
       gender: json['gender']?.toString() ?? '',
       favoriteRoutes: List<String>.from(json['favoriteRoutes'] ?? []),
       driverId: _parseInt(json['driverId']),
+      role: _parseInt(json['role']) ?? 0,
     );
   }
 
@@ -46,6 +48,7 @@ class UserModel extends User {
       'gender': gender,
       'favoriteRoutes': favoriteRoutes,
       'driverId': driverId,
+      'role': role,
     };
   }
 
@@ -59,6 +62,7 @@ class UserModel extends User {
     String? gender,
     List<String>? favoriteRoutes,
     int? driverId,
+    int? role,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -70,6 +74,7 @@ class UserModel extends User {
       gender: gender ?? this.gender,
       favoriteRoutes: favoriteRoutes ?? this.favoriteRoutes,
       driverId: driverId ?? this.driverId,
+      role: role ?? this.role,
     );
   }
 }

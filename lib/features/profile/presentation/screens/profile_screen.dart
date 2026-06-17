@@ -21,7 +21,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserProvider>().loadCurrentUser();
+      final userProvider = context.read<UserProvider>();
+      final authProvider = context.read<AuthProvider>();
+      userProvider.loadCurrentUser();
+      if (authProvider.token != null) {
+        userProvider.setToken(authProvider.token!);
+      }
+      userProvider.loadProfileStats();
     });
   }
 
@@ -51,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 name: 'Usuario',
                 lastName: 'Invitado',
                 username: 'guest',
-                email: 'Sin sesión',
+                email: 'Sin sesion',
                 phone: '',
                 gender: '',
                 favoriteRoutes: [],
@@ -75,22 +81,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 4),
                 Text(user.email, style: const TextStyle(fontSize: 14, color: AppColors.carbon400)),
                 const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.gold500.withValues(alpha:0.15),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.gold500.withValues(alpha:0.3)),
-                  ),
-                  child: const Text(
-                    'Viajero',
-                    style: TextStyle(color: AppColors.gold400, fontSize: 12, fontWeight: FontWeight.w500),
-                  ),
-                ),
+                _buildRoleBadge(user),
                 const SizedBox(height: 28),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _buildStatsRow(),
+                  child: _buildStatsRow(provider.stats),
                 ),
                 const SizedBox(height: 24),
                 Padding(
@@ -105,10 +100,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ElevatedButton.icon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-                        ),
+                        onPressed: () async {
+                          final provider = context.read<UserProvider>();
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                          );
+                          if (mounted) {
+                            provider.loadCurrentUser();
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -161,7 +162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const Divider(height: 1, indent: 56),
                       _buildMenuTile(
                         icon: Icons.logout_rounded,
-                        title: 'Cerrar Sesión',
+                        title: 'Cerrar Sesion',
                         titleColor: AppColors.danger,
                         iconColor: AppColors.danger,
                         showChevron: false,
@@ -179,7 +180,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _buildRoleBadge(User user) {
+    final Color bgColor;
+    final Color textColor;
+    final IconData icon;
+
+    switch (user.role) {
+      case 2:
+        bgColor = const Color(0xFF1A3A2A);
+        textColor = const Color(0xFF4ADE80);
+        icon = Icons.directions_car_rounded;
+        break;
+      case 3:
+        bgColor = const Color(0xFF2A1A3A);
+        textColor = const Color(0xFFBB86FC);
+        icon = Icons.admin_panel_settings_rounded;
+        break;
+      default:
+        bgColor = AppColors.gold500.withValues(alpha: 0.15);
+        textColor = AppColors.gold400;
+        icon = Icons.person_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: textColor.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: textColor),
+          const SizedBox(width: 5),
+          Text(
+            user.roleLabel,
+            style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAvatar(User user) {
+    final initials = _getInitials(user);
     return Stack(
       children: [
         Container(
@@ -190,14 +235,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
             border: Border.all(color: AppColors.gold500, width: 2),
             boxShadow: [
               BoxShadow(
-                color: AppColors.gold500.withValues(alpha:0.25),
+                color: AppColors.gold500.withValues(alpha: 0.25),
                 blurRadius: 20,
                 spreadRadius: 2,
               ),
             ],
-            image: const DecorationImage(
-              image: AssetImage('assets/images/chapaturutalogo.png'),
-              fit: BoxFit.cover,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.gold600, AppColors.gold500],
+            ),
+          ),
+          child: Center(
+            child: Text(
+              initials,
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                color: AppColors.carbon950,
+              ),
             ),
           ),
         ),
@@ -210,21 +266,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: AppColors.gold500,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.edit_rounded, size: 14, color: AppColors.carbon950),
+            child: const Icon(Icons.camera_alt_rounded, size: 14, color: AppColors.carbon950),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStatsRow() {
+  String _getInitials(User user) {
+    final name = user.name.trim();
+    final lastName = user.lastName.trim();
+    if (name.isEmpty && lastName.isEmpty) {
+      return user.username.isNotEmpty ? user.username[0].toUpperCase() : '?';
+    }
+    final first = name.isNotEmpty ? name[0].toUpperCase() : '';
+    final second = lastName.isNotEmpty ? lastName[0].toUpperCase() : '';
+    return '$first$second';
+  }
+
+  Widget _buildStatsRow(ProfileStats stats) {
     return Row(
       children: [
-        _buildStatItem('0', 'Viajes'),
+        _buildStatItem('${stats.trips}', 'Viajes'),
         _buildStatDivider(),
-        _buildStatItem('0', 'Colecciones'),
+        _buildStatItem('${stats.collections}', 'Colecciones'),
         _buildStatDivider(),
-        _buildStatItem('0', 'Reseñas'),
+        _buildStatItem('${stats.ratings}', 'Resenas'),
       ],
     );
   }
@@ -265,7 +332,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: (iconColor ?? AppColors.gold500).withValues(alpha:0.1),
+          color: (iconColor ?? AppColors.gold500).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: iconColor ?? AppColors.gold500, size: 18),
@@ -291,9 +358,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.carbon800,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Cerrar Sesión', style: TextStyle(color: AppColors.carbon50)),
+        title: const Text('Cerrar Sesion', style: TextStyle(color: AppColors.carbon50)),
         content: const Text(
-          '¿Estás seguro que deseas cerrar sesión?',
+          'Estas seguro que deseas cerrar sesion?',
           style: TextStyle(color: AppColors.carbon200),
         ),
         actions: [
@@ -304,7 +371,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
-            child: const Text('Cerrar Sesión', style: TextStyle(color: Colors.white)),
+            child: const Text('Cerrar Sesion', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

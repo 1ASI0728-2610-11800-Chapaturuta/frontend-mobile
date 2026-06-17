@@ -65,15 +65,17 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       );
 
       if (success && mounted) {
+        final authUser = authProvider.currentUser;
         final newUser = UserModel(
-          id: authProvider.currentUser?.id.toString() ?? '1',
-          name: authProvider.currentUser?.name ?? 'Usuario',
+          id: authUser?.id.toString() ?? '1',
+          name: authUser?.name ?? 'Usuario',
           lastName: '',
           username: _emailController.text.split('@')[0],
           email: _emailController.text.trim(),
           phone: '',
           gender: '',
           favoriteRoutes: [],
+          role: authUser?.role ?? 0,
         );
         await userProvider.updateUser(newUser);
 

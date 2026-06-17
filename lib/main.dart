@@ -45,10 +45,16 @@ class MyApp extends StatelessWidget {
             repository: AuthRepositoryImpl(apiService: AuthApiService()),
           ),
         ),
-        ChangeNotifierProvider(
+        ChangeNotifierProxyProvider<AuthProvider, UserProvider>(
           create: (_) => UserProvider(
             repository: UserRepositoryImpl(),
           )..loadCurrentUser(),
+          update: (context, authProvider, previousUserProvider) {
+            if (authProvider.token != null) {
+              previousUserProvider!.setToken(authProvider.token!);
+            }
+            return previousUserProvider!;
+          },
         ),
         ChangeNotifierProxyProvider<AuthProvider, RouteProvider>(
           create: (context) => RouteProvider(
