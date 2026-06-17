@@ -22,6 +22,8 @@ import 'features/network/routes/data/datasources/company_route_api_service.dart'
 import 'features/network/routes/presentation/providers/company_route_provider.dart';
 import 'features/network/stops/data/datasources/stop_api_service.dart';
 import 'features/network/stops/presentation/providers/stop_provider.dart';
+import 'features/reservations/data/datasources/reservation_api_service.dart';
+import 'features/reservations/presentation/providers/reservation_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +39,7 @@ class MyApp extends StatelessWidget {
     final driverApiService = DriverApiService();
     final stopApiService = StopApiService();
     final companyRouteApiService = CompanyRouteApiService();
+    final reservationApiService = ReservationApiService();
 
     return MultiProvider(
       providers: [
@@ -95,6 +98,15 @@ class MyApp extends StatelessWidget {
               companyRouteApiService.setBearerToken(authProvider.token!);
             }
             return previousRouteProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, ReservationProvider>(
+          create: (context) => ReservationProvider(apiService: reservationApiService),
+          update: (context, authProvider, previousReservationProvider) {
+            if (authProvider.token != null) {
+              reservationApiService.setBearerToken(authProvider.token!);
+            }
+            return previousReservationProvider!;
           },
         ),
       ],

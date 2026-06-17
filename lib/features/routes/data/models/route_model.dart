@@ -10,15 +10,14 @@ class TransportRouteModel extends TransportRoute {
     required super.state,
     super.polylineRoute,
     required super.driverId,
+    super.frequency,
+    super.stops,
     super.originAddress,
     super.destinationAddress,
   });
 
   factory TransportRouteModel.fromJson(Map<String, dynamic> json) {
-    // Backend RouteAggregateResource fields:
-    //   id (int), price (double), frequency (int), duration (int minutes),
-    //   isActive (bool), status (string), distanceMeters (decimal?),
-    //   durationSeconds (int?), geometry (string?), stops, schedules
+    final parsedStops = _parseStops(json['stops']);
     return TransportRouteModel(
       id: _parseInt(json['id']),
       name: _asString(json['name'])
@@ -30,9 +29,19 @@ class TransportRouteModel extends TransportRoute {
       state: _asString(json['status']) ?? _asString(json['state']) ?? 'Active',
       polylineRoute: _asString(json['geometry']) ?? _asString(json['polylineRoute']),
       driverId: _parseInt(json['driverId']),
+      frequency: _parseInt(json['frequency']),
+      stops: parsedStops,
       originAddress: _asString(json['originAddress']),
       destinationAddress: _asString(json['destinationAddress']),
     );
+  }
+
+  static List<RouteStop> _parseStops(dynamic stops) {
+    if (stops is! List) return [];
+    return stops
+        .whereType<Map<String, dynamic>>()
+        .map((s) => RouteStop.fromJson(s))
+        .toList();
   }
 
   static int _parseInt(dynamic v) {

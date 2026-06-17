@@ -74,7 +74,6 @@ class CompanyStopModel {
             : '';
     return {
       'Name': name,
-      'Phone': phone,
       'Address': address,
       'Reference': reference,
       'FkIdDriver': driverId.toString(),

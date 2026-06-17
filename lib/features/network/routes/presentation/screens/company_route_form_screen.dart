@@ -5,11 +5,12 @@ import 'package:provider/provider.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../shared/widgets/map_with_markers.dart';
 import '../../../../driver/presentation/providers/driver_provider.dart';
+import '../../../../network/stops/data/models/company_stop_model.dart';
 import '../../../../network/stops/presentation/providers/stop_provider.dart';
 import '../../data/models/company_route_model.dart';
 import '../providers/company_route_provider.dart';
 
-const _kDayKeys = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const _kDayKeys = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
 
 class CompanyRouteFormScreen extends StatefulWidget {
   final CompanyRouteModel? route;
@@ -22,11 +23,10 @@ class CompanyRouteFormScreen extends StatefulWidget {
 
 class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController();
   final _priceCtrl = TextEditingController();
   final _durationCtrl = TextEditingController();
   final _frequencyCtrl = TextEditingController();
-  final Set<int> _selectedStopIds = {};
+  final List<int> _selectedStopIds = [];
   late Map<String, RouteScheduleModel> _schedules;
 
   @override
@@ -38,7 +38,6 @@ class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
     };
     final route = widget.route;
     if (route != null) {
-      _nameCtrl.text = route.name;
       _priceCtrl.text = route.price.toStringAsFixed(2);
       _durationCtrl.text = route.duration.toString();
       _frequencyCtrl.text = route.frequency.toString();
@@ -55,7 +54,6 @@ class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
     _priceCtrl.dispose();
     _durationCtrl.dispose();
     _frequencyCtrl.dispose();
@@ -104,6 +102,24 @@ class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
     return '${pad(t.hour)}:${pad(t.minute)}';
   }
 
+  void _toggleStop(int stopId) {
+    setState(() {
+      if (_selectedStopIds.contains(stopId)) {
+        _selectedStopIds.remove(stopId);
+      } else {
+        _selectedStopIds.add(stopId);
+      }
+    });
+  }
+
+  void _reorderStops(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) newIndex--;
+      final item = _selectedStopIds.removeAt(oldIndex);
+      _selectedStopIds.insert(newIndex, item);
+    });
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedStopIds.length < 2) {
@@ -115,19 +131,17 @@ class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
     final activeSchedules = _schedules.values.where((s) => s.enabled).toList();
     if (activeSchedules.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Activa al menos un día de servicio')),
+        const SnackBar(content: Text('Activa al menos un dia de servicio')),
       );
       return;
     }
 
-    final driver = context.read<DriverProvider>().driver;
-    if (driver == null) return;
     final provider = context.read<CompanyRouteProvider>();
     final ok = await provider.save(
       CompanyRouteModel(
         id: widget.route?.id ?? 0,
-        companyId: driver.id,
-        name: _nameCtrl.text.trim(),
+        companyId: 0,
+        name: '',
         price: double.tryParse(_priceCtrl.text.trim()) ?? 0,
         duration: int.tryParse(_durationCtrl.text.trim()) ?? 0,
         frequency: int.tryParse(_frequencyCtrl.text.trim()) ?? 0,
@@ -152,8 +166,15 @@ class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
     final stops = context.watch<StopProvider>().stops;
     final stopProvider = context.watch<StopProvider>();
     final routeProvider = context.watch<CompanyRouteProvider>();
-    final previewStops = stops
-        .where((stop) => _selectedStopIds.contains(stop.id) && stop.latitude != 0 && stop.longitude != 0)
+
+    final selectedStops = <CompanyStopModel>[];
+    for (final id in _selectedStopIds) {
+      final match = stops.where((s) => s.id == id);
+      if (match.isNotEmpty) selectedStops.add(match.first);
+    }
+
+    final previewStops = selectedStops
+        .where((s) => s.latitude != 0 && s.longitude != 0)
         .toList();
 
     return Scaffold(
@@ -165,73 +186,163 @@ class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              _field(_nameCtrl, 'Nombre', validator: (v) => _required(v, 'Nombre')),
+              _field(_priceCtrl, 'Precio (S/.)',
+                  keyboardType: TextInputType.number,
+                  validator: (v) => _required(v, 'Precio')),
               const SizedBox(height: 14),
-              _field(_priceCtrl, 'Precio', keyboardType: TextInputType.number, validator: (v) => _required(v, 'Precio')),
+              _field(_durationCtrl, 'Duracion estimada (minutos)',
+                  keyboardType: TextInputType.number,
+                  validator: (v) => _required(v, 'Duracion')),
               const SizedBox(height: 14),
-              _field(_durationCtrl, 'Duracion en minutos', keyboardType: TextInputType.number),
-              const SizedBox(height: 14),
-              _field(_frequencyCtrl, 'Frecuencia en minutos', keyboardType: TextInputType.number),
+              _field(_frequencyCtrl, 'Frecuencia de salida (minutos)',
+                  keyboardType: TextInputType.number,
+                  validator: (v) => _required(v, 'Frecuencia')),
               const SizedBox(height: 20),
-              const Text(
-                'Paraderos',
-                style: TextStyle(color: AppColors.carbon50, fontWeight: FontWeight.w700),
+
+              // --- Stop selection ---
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Paraderos',
+                      style: TextStyle(color: AppColors.carbon50, fontWeight: FontWeight.w700, fontSize: 16),
+                    ),
+                  ),
+                  Text(
+                    '${_selectedStopIds.length} seleccionados',
+                    style: const TextStyle(color: AppColors.carbon400, fontSize: 12),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
+              const Text(
+                'Selecciona paraderos en el orden de la ruta (origen a destino)',
+                style: TextStyle(color: AppColors.carbon600, fontSize: 12),
+              ),
+              const SizedBox(height: 10),
+
               if (stops.isEmpty)
-                const Text('Crea paraderos antes de crear rutas', style: TextStyle(color: AppColors.carbon400))
-              else
-                ...stops.map(
-                  (stop) => CheckboxListTile(
-                    value: _selectedStopIds.contains(stop.id),
-                    onChanged: (value) {
-                      setState(() {
-                        if (value == true) {
-                          _selectedStopIds.add(stop.id);
-                        } else {
-                          _selectedStopIds.remove(stop.id);
-                        }
-                      });
-                    },
-                    activeColor: AppColors.gold500,
-                    checkColor: AppColors.carbon950,
-                    title: Text(stop.name, style: const TextStyle(color: AppColors.carbon50)),
-                    subtitle: Text(stop.address, style: const TextStyle(color: AppColors.carbon400)),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.carbon800,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.carbon700),
+                  ),
+                  child: const Column(
+                    children: [
+                      Icon(Icons.pin_drop_outlined, color: AppColors.carbon600, size: 32),
+                      SizedBox(height: 8),
+                      Text(
+                        'Crea paraderos antes de crear rutas',
+                        style: TextStyle(color: AppColors.carbon400),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                )
+              else ...[
+                // Available stops to add
+                ...stops.where((s) => !_selectedStopIds.contains(s.id)).map(
+                  (stop) => _StopSelectTile(
+                    stop: stop,
+                    selected: false,
+                    order: null,
+                    onTap: () => _toggleStop(stop.id),
                   ),
                 ),
+
+                if (_selectedStopIds.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Orden de la ruta (arrastra para reordenar)',
+                    style: TextStyle(color: AppColors.gold400, fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                  const SizedBox(height: 8),
+                  ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: selectedStops.length,
+                    // ignore: deprecated_member_use
+                    onReorder: _reorderStops,
+                    proxyDecorator: (child, index, animation) {
+                      return Material(
+                        color: Colors.transparent,
+                        elevation: 4,
+                        shadowColor: AppColors.gold500.withValues(alpha: 0.3),
+                        child: child,
+                      );
+                    },
+                    itemBuilder: (context, index) {
+                      final stop = selectedStops[index];
+                      final isFirst = index == 0;
+                      final isLast = index == selectedStops.length - 1;
+                      return _StopOrderTile(
+                        key: ValueKey(stop.id),
+                        stop: stop,
+                        order: index + 1,
+                        isFirst: isFirst,
+                        isLast: isLast,
+                        onRemove: () => _toggleStop(stop.id),
+                      );
+                    },
+                  ),
+                ],
+              ],
+
               const SizedBox(height: 20),
               const Text(
-                'Horarios',
-                style: TextStyle(color: AppColors.carbon50, fontWeight: FontWeight.w700),
+                'Horarios de operacion',
+                style: TextStyle(color: AppColors.carbon50, fontWeight: FontWeight.w700, fontSize: 16),
               ),
               const SizedBox(height: 8),
               ..._kDayKeys.map(_scheduleRow),
+
               if (previewStops.length >= 2) ...[
                 const SizedBox(height: 18),
+                const Text(
+                  'Vista previa del recorrido',
+                  style: TextStyle(color: AppColors.carbon50, fontWeight: FontWeight.w700, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
                 SizedBox(
                   height: 240,
-                  child: MapWithMarkers(
-                    tileUrl: stopProvider.tileUrl,
-                    center: LatLng(previewStops.first.latitude, previewStops.first.longitude),
-                    markers: previewStops
-                        .map((stop) => MapMarkerData(
-                              point: LatLng(stop.latitude, stop.longitude),
-                              label: stop.name,
-                            ))
-                        .toList(),
-                    polyline: previewStops
-                        .map((stop) => LatLng(stop.latitude, stop.longitude))
-                        .toList(),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: MapWithMarkers(
+                      tileUrl: stopProvider.tileUrl,
+                      center: previewStops.first.latitude != 0
+                          ? LatLng(previewStops.first.latitude, previewStops.first.longitude)
+                          : const LatLng(-18.0146, -70.2536),
+                      markers: previewStops
+                          .asMap()
+                          .entries
+                          .map((e) => MapMarkerData(
+                                point: LatLng(e.value.latitude, e.value.longitude),
+                                label: '${e.key + 1}. ${e.value.name}',
+                              ))
+                          .toList(),
+                      polyline: previewStops
+                          .map((s) => LatLng(s.latitude, s.longitude))
+                          .toList(),
+                    ),
                   ),
                 ),
               ],
+
               const SizedBox(height: 24),
               SizedBox(
                 height: 52,
                 child: ElevatedButton.icon(
                   onPressed: routeProvider.isLoading ? null : _save,
-                  icon: const Icon(Icons.save_outlined),
-                  label: const Text('Guardar ruta'),
+                  icon: routeProvider.isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.carbon950),
+                        )
+                      : const Icon(Icons.save_outlined),
+                  label: Text(widget.route == null ? 'Crear ruta' : 'Guardar cambios'),
                 ),
               ),
             ],
@@ -302,6 +413,114 @@ class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
       style: const TextStyle(color: AppColors.carbon50),
       validator: validator,
       decoration: InputDecoration(labelText: label),
+    );
+  }
+}
+
+class _StopSelectTile extends StatelessWidget {
+  final CompanyStopModel stop;
+  final bool selected;
+  final int? order;
+  final VoidCallback onTap;
+
+  const _StopSelectTile({
+    required this.stop,
+    required this.selected,
+    required this.order,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      decoration: BoxDecoration(
+        color: AppColors.carbon800,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.carbon700),
+      ),
+      child: ListTile(
+        dense: true,
+        onTap: onTap,
+        leading: const Icon(Icons.add_circle_outline, color: AppColors.gold500, size: 22),
+        title: Text(stop.name, style: const TextStyle(color: AppColors.carbon50, fontSize: 14)),
+        subtitle: Text(stop.address, style: const TextStyle(color: AppColors.carbon400, fontSize: 11)),
+      ),
+    );
+  }
+}
+
+class _StopOrderTile extends StatelessWidget {
+  final CompanyStopModel stop;
+  final int order;
+  final bool isFirst;
+  final bool isLast;
+  final VoidCallback onRemove;
+
+  const _StopOrderTile({
+    super.key,
+    required this.stop,
+    required this.order,
+    required this.isFirst,
+    required this.isLast,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final label = isFirst
+        ? 'Origen'
+        : isLast
+            ? 'Destino'
+            : 'Parada $order';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      decoration: BoxDecoration(
+        color: AppColors.carbon800,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: (isFirst || isLast) ? AppColors.gold500.withValues(alpha: 0.5) : AppColors.carbon700,
+        ),
+      ),
+      child: ListTile(
+        dense: true,
+        leading: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: (isFirst || isLast) ? AppColors.gold500 : AppColors.carbon700,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              '$order',
+              style: TextStyle(
+                color: (isFirst || isLast) ? AppColors.carbon950 : AppColors.carbon50,
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ),
+        title: Text(stop.name, style: const TextStyle(color: AppColors.carbon50, fontSize: 14)),
+        subtitle: Text(label, style: TextStyle(
+          color: (isFirst || isLast) ? AppColors.gold400 : AppColors.carbon400,
+          fontSize: 11,
+          fontWeight: (isFirst || isLast) ? FontWeight.w600 : FontWeight.w400,
+        )),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.remove_circle_outline, color: AppColors.danger, size: 20),
+              onPressed: onRemove,
+              tooltip: 'Quitar',
+            ),
+            const Icon(Icons.drag_handle_rounded, color: AppColors.carbon600, size: 20),
+          ],
+        ),
+      ),
     );
   }
 }

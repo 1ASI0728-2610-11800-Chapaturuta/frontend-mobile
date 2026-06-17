@@ -17,7 +17,7 @@ class StopsMapScreen extends StatelessWidget {
             .where((stop) => stop.latitude != 0 && stop.longitude != 0)
             .toList();
         final center = validStops.isEmpty
-            ? const LatLng(-12.0464, -77.0428)
+            ? const LatLng(-18.0146, -70.2536)
             : LatLng(validStops.first.latitude, validStops.first.longitude);
 
         if (validStops.isEmpty) {

@@ -1,3 +1,36 @@
+class RouteStop {
+  final int id;
+  final String name;
+  final String? address;
+  final double? latitude;
+  final double? longitude;
+
+  const RouteStop({
+    required this.id,
+    required this.name,
+    this.address,
+    this.latitude,
+    this.longitude,
+  });
+
+  factory RouteStop.fromJson(Map<String, dynamic> json) {
+    return RouteStop(
+      id: (json['id'] is int) ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: json['name']?.toString() ?? '',
+      address: json['address']?.toString(),
+      latitude: _toDouble(json['latitude']),
+      longitude: _toDouble(json['longitude']),
+    );
+  }
+
+  static double? _toDouble(dynamic v) {
+    if (v == null) return null;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v);
+    return null;
+  }
+}
 
 class TransportRoute {
   final int id;
@@ -8,8 +41,9 @@ class TransportRoute {
   final String state;
   final String? polylineRoute;
   final int driverId;
-  
-  // Estos campos los derivamos del name o los dejamos opcionales
+  final int frequency;
+  final List<RouteStop> stops;
+
   final String? originAddress;
   final String? destinationAddress;
 
@@ -22,20 +56,22 @@ class TransportRoute {
     required this.state,
     this.polylineRoute,
     required this.driverId,
+    this.frequency = 0,
+    this.stops = const [],
     this.originAddress,
     this.destinationAddress,
   });
 
-  // Método helper para obtener nombre del origen (parseamos el name)
   String get origin {
     if (originAddress != null) return originAddress!;
+    if (stops.isNotEmpty) return stops.first.name;
     final parts = name.split('-');
     return parts.isNotEmpty ? parts[0].trim() : 'Origen';
   }
 
-  // Método helper para obtener nombre del destino
   String get destination {
     if (destinationAddress != null) return destinationAddress!;
+    if (stops.length > 1) return stops.last.name;
     final parts = name.split('-');
     return parts.length > 1 ? parts[1].trim() : 'Destino';
   }

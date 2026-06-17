@@ -30,8 +30,7 @@ class _StopFormScreenState extends State<StopFormScreen> {
   final _nameCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
   final _referenceCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
-  LatLng _point = const LatLng(-12.0464, -77.0428);
+  LatLng _point = const LatLng(-18.0146, -70.2536);
   Uint8List? _imageBytes;
   String? _imageName;
   DistrictOption? _selectedDistrict;
@@ -44,7 +43,6 @@ class _StopFormScreenState extends State<StopFormScreen> {
       _nameCtrl.text = stop.name;
       _addressCtrl.text = stop.address;
       _referenceCtrl.text = stop.reference;
-      _phoneCtrl.text = stop.phone;
       if (stop.latitude != 0 && stop.longitude != 0) {
         _point = LatLng(stop.latitude, stop.longitude);
       }
@@ -68,7 +66,6 @@ class _StopFormScreenState extends State<StopFormScreen> {
     _nameCtrl.dispose();
     _addressCtrl.dispose();
     _referenceCtrl.dispose();
-    _phoneCtrl.dispose();
     super.dispose();
   }
 
@@ -100,7 +97,6 @@ class _StopFormScreenState extends State<StopFormScreen> {
         name: _nameCtrl.text.trim(),
         address: _addressCtrl.text.trim(),
         reference: _referenceCtrl.text.trim(),
-        phone: _phoneCtrl.text.trim(),
         latitude: _point.latitude,
         longitude: _point.longitude,
         imageUrl: widget.stop?.imageUrl,
@@ -112,7 +108,7 @@ class _StopFormScreenState extends State<StopFormScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(ok ? 'Paradero guardado' : provider.error ?? 'No se pudo guardar')),
     );
-    if (ok) Navigator.of(context).pop();
+    if (ok) Navigator.of(context).pop(true);
   }
 
   String? _required(String? value, String label) {
@@ -132,7 +128,7 @@ class _StopFormScreenState extends State<StopFormScreen> {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              _field(_nameCtrl, 'Nombre', validator: (v) => _required(v, 'Nombre')),
+              _field(_nameCtrl, 'Nombre del paradero', validator: (v) => _required(v, 'Nombre')),
               const SizedBox(height: 14),
               _field(_addressCtrl, 'Direccion', validator: (v) => _required(v, 'Direccion')),
               const SizedBox(height: 14),
@@ -166,9 +162,12 @@ class _StopFormScreenState extends State<StopFormScreen> {
                 },
                 onSelected: (value) => setState(() => _selectedDistrict = value),
               ),
-              const SizedBox(height: 14),
-              _field(_phoneCtrl, 'Telefono', keyboardType: TextInputType.phone, validator: (v) => _required(v, 'Telefono')),
               const SizedBox(height: 18),
+              const Text(
+                'Imagen del paradero (opcional)',
+                style: TextStyle(color: AppColors.carbon400, fontSize: 12),
+              ),
+              const SizedBox(height: 6),
               GestureDetector(
                 onTap: _pickImage,
                 child: Container(
@@ -178,29 +177,64 @@ class _StopFormScreenState extends State<StopFormScreen> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: AppColors.carbon700),
                   ),
-                  child: _imageBytes == null
-                      ? const Center(
-                          child: Icon(Icons.add_photo_alternate_outlined, color: AppColors.gold500, size: 34),
+                  child: _imageBytes != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.memory(_imageBytes!, fit: BoxFit.cover, width: double.infinity),
                         )
-                      : Image.memory(_imageBytes!, fit: BoxFit.cover),
+                      : widget.stop?.imageUrl != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(widget.stop!.imageUrl!, fit: BoxFit.cover, width: double.infinity),
+                            )
+                          : const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.add_photo_alternate_outlined, color: AppColors.gold500, size: 34),
+                                  SizedBox(height: 4),
+                                  Text('Toca para seleccionar', style: TextStyle(color: AppColors.carbon600, fontSize: 11)),
+                                ],
+                              ),
+                            ),
                 ),
               ),
               const SizedBox(height: 18),
+              const Text(
+                'Ubicacion en el mapa',
+                style: TextStyle(color: AppColors.carbon400, fontSize: 12),
+              ),
+              const SizedBox(height: 6),
               SizedBox(
                 height: 260,
-                child: MapPicker(
-                  tileUrl: provider.tileUrl,
-                  initialPoint: _point,
-                  onChanged: (point) => _point = point,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: MapPicker(
+                    tileUrl: provider.tileUrl,
+                    initialPoint: _point,
+                    onChanged: (point) => _point = point,
+                  ),
                 ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Lat: ${_point.latitude.toStringAsFixed(6)}, Lng: ${_point.longitude.toStringAsFixed(6)}',
+                style: const TextStyle(color: AppColors.carbon600, fontSize: 11),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               SizedBox(
                 height: 52,
                 child: ElevatedButton.icon(
                   onPressed: provider.isLoading ? null : _save,
-                  icon: const Icon(Icons.save_outlined),
-                  label: const Text('Guardar paradero'),
+                  icon: provider.isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.carbon950),
+                        )
+                      : const Icon(Icons.save_outlined),
+                  label: Text(widget.stop == null ? 'Crear paradero' : 'Guardar cambios'),
                 ),
               ),
             ],

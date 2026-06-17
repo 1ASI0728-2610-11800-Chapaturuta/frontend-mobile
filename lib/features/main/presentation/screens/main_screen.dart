@@ -3,7 +3,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../routes/presentation/screens/routes_list_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../collections/presentation/screens/collections_screen.dart';
-import '../../../notifications/presentation/screens/notifications_screen.dart';
+import '../../../reservations/presentation/screens/my_reservations_screen.dart';
 import '../../../discovery/presentation/screens/search_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -20,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
     SearchScreen(),
     CollectionsScreen(),
     RoutesListScreen(),
-    NotificationsScreen(),
+    MyReservationsScreen(),
     ProfileScreen(),
   ];
 
@@ -60,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
               _buildNavItem(0, Icons.search_rounded, 'Descubrir'),
               _buildNavItem(1, Icons.folder_outlined, 'Colecciones'),
               _buildNavItem(2, Icons.directions_bus_rounded, 'Rutas'),
-              _buildNavItem(3, Icons.notifications_outlined, 'Alertas'),
+              _buildNavItem(3, Icons.confirmation_num_outlined, 'Reservas'),
               _buildNavItem(4, Icons.person_outline_rounded, 'Perfil'),
             ],
           ),

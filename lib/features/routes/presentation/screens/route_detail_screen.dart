@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/route.dart';
 import '../providers/route_provider.dart';
+import '../../../reservations/presentation/screens/reservation_form_screen.dart';
 
 class RouteDetailScreen extends StatefulWidget {
   final String routeId;
@@ -67,7 +68,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
               child: Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.carbon800.withValues(alpha:0.8),
+                  color: AppColors.carbon800.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: AppColors.carbon700),
                 ),
@@ -88,7 +89,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                   margin: const EdgeInsets.all(8),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.carbon800.withValues(alpha:0.8),
+                    color: AppColors.carbon800.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isFavorite ? AppColors.gold500 : AppColors.carbon700,
@@ -118,7 +119,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                     child: Icon(
                       Icons.directions_bus_rounded,
                       size: 80,
-                      color: AppColors.gold500.withValues(alpha:0.35),
+                      color: AppColors.gold500.withValues(alpha: 0.35),
                     ),
                   ),
                 ),
@@ -149,22 +150,44 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: isActive
-                                    ? AppColors.success.withValues(alpha:0.15)
-                                    : AppColors.danger.withValues(alpha:0.15),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                isActive ? 'Activo' : 'Inactivo',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isActive ? AppColors.success : AppColors.danger,
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: isActive
+                                        ? AppColors.success.withValues(alpha: 0.15)
+                                        : AppColors.danger.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    isActive ? 'Activo' : 'Inactivo',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isActive ? AppColors.success : AppColors.danger,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                if (route!.frequency > 0) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.gold500.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      'Cada ${route!.frequency} min',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.gold500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ],
                         ),
@@ -190,14 +213,20 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                     ),
                     child: Row(
                       children: [
-                        _buildStatItem(Icons.access_time_rounded, 'Duración', route!.duration),
+                        _buildStatItem(Icons.access_time_rounded, 'Duracion', route!.duration),
                         Container(height: 40, width: 1, color: AppColors.carbon700),
                         _buildStatItem(Icons.straighten_rounded, 'Distancia', route!.distance),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  if (route!.originAddress != null || route!.destinationAddress != null) ...[
+
+                  if (route!.stops.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    _buildStopsTimeline(route!.stops),
+                  ],
+
+                  if (route!.stops.isEmpty && (route!.originAddress != null || route!.destinationAddress != null)) ...[
+                    const SizedBox(height: 24),
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -217,11 +246,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                           if (route!.originAddress != null && route!.destinationAddress != null)
                             Padding(
                               padding: const EdgeInsets.only(left: 10),
-                              child: Container(
-                                width: 1,
-                                height: 20,
-                                color: AppColors.carbon700,
-                              ),
+                              child: Container(width: 1, height: 20, color: AppColors.carbon700),
                             ),
                           if (route!.destinationAddress != null)
                             _buildAddressRow(
@@ -233,8 +258,9 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
                   ],
+
+                  const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     child: DecoratedBox(
@@ -245,14 +271,32 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.gold500.withValues(alpha:0.3),
+                            color: AppColors.gold500.withValues(alpha: 0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: isActive
+                            ? () async {
+                                final messenger = ScaffoldMessenger.of(context);
+                                final reserved = await Navigator.push<bool>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ReservationFormScreen(route: route!),
+                                  ),
+                                );
+                                if (reserved == true && mounted) {
+                                  messenger.showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Reserva registrada. Revisa "Mis reservas"'),
+                                      backgroundColor: AppColors.success,
+                                    ),
+                                  );
+                                }
+                              }
+                            : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -260,8 +304,8 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        icon: const Icon(Icons.star_rounded, size: 20),
-                        label: const Text('Calificar esta ruta', style: TextStyle(fontWeight: FontWeight.w700)),
+                        icon: const Icon(Icons.confirmation_num_rounded, size: 20),
+                        label: const Text('Reservar viaje', style: TextStyle(fontWeight: FontWeight.w700)),
                       ),
                     ),
                   ),
@@ -270,6 +314,100 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStopsTimeline(List<RouteStop> stops) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.carbon800,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.carbon700),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.route_rounded, color: AppColors.gold500, size: 18),
+              SizedBox(width: 8),
+              Text(
+                'Recorrido',
+                style: TextStyle(
+                  color: AppColors.carbon200,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ...List.generate(stops.length, (i) {
+            final stop = stops[i];
+            final isFirst = i == 0;
+            final isLast = i == stops.length - 1;
+
+            return IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 24,
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: isFirst
+                                ? AppColors.success
+                                : isLast
+                                    ? AppColors.gold500
+                                    : AppColors.carbon600,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        if (!isLast)
+                          Expanded(
+                            child: Container(
+                              width: 1.5,
+                              color: AppColors.carbon700,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            stop.name,
+                            style: TextStyle(
+                              color: isFirst || isLast ? AppColors.carbon50 : AppColors.carbon200,
+                              fontWeight: isFirst || isLast ? FontWeight.w700 : FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                          if (stop.address != null && stop.address!.isNotEmpty)
+                            Text(
+                              stop.address!,
+                              style: const TextStyle(color: AppColors.carbon400, fontSize: 11),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );

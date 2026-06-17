@@ -28,10 +28,11 @@ class _CompanyRoutesListScreenState extends State<CompanyRoutesListScreen> {
     await context.read<CompanyRouteProvider>().load(driver.id);
   }
 
-  void _openForm([CompanyRouteModel? route]) {
-    Navigator.of(context).push(
+  void _openForm([CompanyRouteModel? route]) async {
+    await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => CompanyRouteFormScreen(route: route)),
     );
+    if (mounted) _load();
   }
 
   Future<void> _delete(int id) async {
@@ -151,7 +152,7 @@ class _RouteCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'S/ ${route.price.toStringAsFixed(2)} - ${route.duration} min - ${route.frequency} min',
+                  'S/ ${route.price.toStringAsFixed(2)} | ${route.duration} min | cada ${route.frequency} min | ${route.stopIds.length} paraderos',
                   style: const TextStyle(color: AppColors.carbon400, fontSize: 12),
                 ),
               ],

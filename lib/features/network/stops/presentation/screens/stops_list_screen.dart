@@ -31,14 +31,15 @@ class _StopsListScreenState extends State<StopsListScreen> {
     await context.read<StopProvider>().load(driver.id);
   }
 
-  void _openForm([CompanyStopModel? stop]) {
+  void _openForm([CompanyStopModel? stop]) async {
     final driver = context.read<DriverProvider>().driver;
     if (driver == null) return;
-    Navigator.of(context).push(
+    final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => StopFormScreen(driverId: driver.id, stop: stop),
       ),
     );
+    if (saved == true && mounted) _load();
   }
 
   Future<void> _delete(int id) async {
