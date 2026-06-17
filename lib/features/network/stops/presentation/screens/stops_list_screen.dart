@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/theme/app_theme.dart';
-import '../../../../company/presentation/providers/company_provider.dart';
+import '../../../../driver/presentation/providers/driver_provider.dart';
 import '../../data/models/company_stop_model.dart';
 import '../providers/stop_provider.dart';
 import '../widgets/stop_card.dart';
@@ -26,17 +26,17 @@ class _StopsListScreenState extends State<StopsListScreen> {
   }
 
   Future<void> _load() async {
-    final company = context.read<CompanyProvider>().company;
-    if (company == null) return;
-    await context.read<StopProvider>().load(company.id);
+    final driver = context.read<DriverProvider>().driver;
+    if (driver == null) return;
+    await context.read<StopProvider>().load(driver.id);
   }
 
   void _openForm([CompanyStopModel? stop]) {
-    final company = context.read<CompanyProvider>().company;
-    if (company == null) return;
+    final driver = context.read<DriverProvider>().driver;
+    if (driver == null) return;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => StopFormScreen(companyId: company.id, stop: stop),
+        builder: (_) => StopFormScreen(driverId: driver.id, stop: stop),
       ),
     );
   }

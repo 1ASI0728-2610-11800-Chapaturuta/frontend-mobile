@@ -37,7 +37,7 @@ class AuthApiService {
     required String email,
     required String password,
     required String name,
-    int role = 0, // 0=Traveller, 1=TransportManager, 2=Driver, 3=Admin
+    int role = 0, // 0=Traveller, 2=Driver, 3=Admin
   }) async {
     try {
       final response = await http.post(

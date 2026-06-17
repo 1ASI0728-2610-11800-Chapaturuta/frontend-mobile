@@ -26,9 +26,9 @@ class CompanyRouteApiService {
     return headers;
   }
 
-  Future<List<CompanyRouteModel>> getRoutes(int companyId) async {
+  Future<List<CompanyRouteModel>> getRoutes(int driverId) async {
     final response = await http
-        .get(Uri.parse('$baseUrl/routes/company/$companyId'), headers: _headers())
+        .get(Uri.parse('$baseUrl/routes/driver/$driverId'), headers: _headers())
         .timeout(const Duration(seconds: 10));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);

@@ -226,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   ),
                                 ),
                                 validator: (v) =>
-                                    (v == null || v.length < 6) ? 'Mínimo 6 caracteres' : null,
+                                    (v == null || v.length < 8) ? 'Mínimo 8 caracteres' : null,
                               ),
                               const SizedBox(height: 28),
                               Consumer<AuthProvider>(

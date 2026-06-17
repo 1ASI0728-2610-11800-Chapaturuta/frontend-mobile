@@ -19,7 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmCtrl = TextEditingController();
   bool _obscure = true;
   bool _obscureConfirm = true;
-  int _role = 0; // 0=Pasajero, 1=Empresa
+  int _role = 0; // 0=Pasajero, 2=Conductor
 
   @override
   void dispose() {
@@ -171,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       items: const [
                         DropdownMenuItem(value: 0, child: Text('Pasajero')),
-                        DropdownMenuItem(value: 1, child: Text('Empresa')),
+                        DropdownMenuItem(value: 2, child: Text('Conductor')),
                       ],
                       onChanged: (v) => setState(() => _role = v ?? 0),
                     ),

@@ -3,28 +3,24 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../company/presentation/providers/company_provider.dart';
-import '../../../company/presentation/screens/company_home_screen.dart';
-import '../../../company/presentation/screens/company_info_screen.dart';
-import '../../../company/presentation/screens/company_onboarding_screen.dart';
+import '../../../driver/presentation/providers/driver_provider.dart';
+import '../../../driver/presentation/screens/driver_home_screen.dart';
+import '../../../driver/presentation/screens/driver_onboarding_screen.dart';
 import '../../../network/routes/presentation/screens/company_routes_list_screen.dart';
 import '../../../network/stops/presentation/screens/stops_list_screen.dart';
 import '../../../profile/presentation/providers/user_provider.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 
-class CompanyMainScreen extends StatefulWidget {
+class DriverMainScreen extends StatefulWidget {
   final bool skipBootstrap;
 
-  const CompanyMainScreen({
-    super.key,
-    this.skipBootstrap = false,
-  });
+  const DriverMainScreen({super.key, this.skipBootstrap = false});
 
   @override
-  State<CompanyMainScreen> createState() => _CompanyMainScreenState();
+  State<DriverMainScreen> createState() => _DriverMainScreenState();
 }
 
-class _CompanyMainScreenState extends State<CompanyMainScreen> {
+class _DriverMainScreenState extends State<DriverMainScreen> {
   int _selectedIndex = 0;
   bool _bootstrapping = true;
 
@@ -40,32 +36,24 @@ class _CompanyMainScreenState extends State<CompanyMainScreen> {
 
   Future<void> _bootstrap() async {
     final auth = context.read<AuthProvider>();
-    final companyProvider = context.read<CompanyProvider>();
     final userId = auth.currentUser?.id;
-
     if (userId == null || userId.isEmpty) {
       setState(() => _bootstrapping = false);
       return;
     }
 
-    final company = await companyProvider.loadForUser(userId);
+    final driver = await context.read<DriverProvider>().loadForUser(userId);
     if (!mounted) return;
 
-    if (company == null) {
+    if (driver == null) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const CompanyOnboardingScreen()),
+        MaterialPageRoute(builder: (_) => const DriverOnboardingScreen()),
       );
       return;
     }
 
-    await context.read<UserProvider>().setDriverId(company.id);
+    await context.read<UserProvider>().setDriverId(driver.id);
     if (mounted) setState(() => _bootstrapping = false);
-  }
-
-  void _openInfo() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const CompanyInfoScreen()),
-    );
   }
 
   @override
@@ -78,7 +66,7 @@ class _CompanyMainScreenState extends State<CompanyMainScreen> {
     }
 
     final screens = [
-      CompanyHomeScreen(onOpenInfo: _openInfo),
+      const DriverHomeScreen(),
       const StopsListScreen(),
       const CompanyRoutesListScreen(),
       const ProfileScreen(),
@@ -129,7 +117,8 @@ class _CompanyMainScreenState extends State<CompanyMainScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: selected ? AppColors.gold500 : AppColors.carbon400, size: 22),
+            Icon(icon,
+                color: selected ? AppColors.gold500 : AppColors.carbon400, size: 22),
             const SizedBox(height: 4),
             Text(
               label,

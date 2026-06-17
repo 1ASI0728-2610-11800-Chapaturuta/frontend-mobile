@@ -22,11 +22,11 @@ class CompanyRouteProvider with ChangeNotifier {
 
   void setToken(String token) => apiService.setBearerToken(token);
 
-  Future<void> load(int companyId) async {
+  Future<void> load(int driverId) async {
     _setLoading(true);
     try {
       _tileUrl = await apiService.getMapTileUrl();
-      _routes = await apiService.getRoutes(companyId);
+      _routes = await apiService.getRoutes(driverId);
       _error = null;
     } catch (e) {
       _error = e.toString().replaceAll('Exception: ', '');

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../shared/widgets/map_with_markers.dart';
-import '../../../../company/presentation/providers/company_provider.dart';
+import '../../../../driver/presentation/providers/driver_provider.dart';
 import '../../../../network/stops/presentation/providers/stop_provider.dart';
 import '../../data/models/company_route_model.dart';
 import '../providers/company_route_provider.dart';
@@ -48,8 +48,8 @@ class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
       }
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final company = context.read<CompanyProvider>().company;
-      if (company != null) context.read<StopProvider>().load(company.id);
+      final driver = context.read<DriverProvider>().driver;
+      if (driver != null) context.read<StopProvider>().load(driver.id);
     });
   }
 
@@ -120,13 +120,13 @@ class _CompanyRouteFormScreenState extends State<CompanyRouteFormScreen> {
       return;
     }
 
-    final company = context.read<CompanyProvider>().company;
-    if (company == null) return;
+    final driver = context.read<DriverProvider>().driver;
+    if (driver == null) return;
     final provider = context.read<CompanyRouteProvider>();
     final ok = await provider.save(
       CompanyRouteModel(
         id: widget.route?.id ?? 0,
-        companyId: company.id,
+        companyId: driver.id,
         name: _nameCtrl.text.trim(),
         price: double.tryParse(_priceCtrl.text.trim()) ?? 0,
         duration: int.tryParse(_durationCtrl.text.trim()) ?? 0,

@@ -1,6 +1,6 @@
 class CompanyStopModel {
   final int id;
-  final int companyId;
+  final int driverId;
   final int fkIdDistrict;
   final String name;
   final String address;
@@ -14,7 +14,7 @@ class CompanyStopModel {
 
   const CompanyStopModel({
     required this.id,
-    required this.companyId,
+    required this.driverId,
     required this.name,
     required this.address,
     required this.latitude,
@@ -30,7 +30,7 @@ class CompanyStopModel {
   factory CompanyStopModel.fromJson(Map<String, dynamic> json) {
     return CompanyStopModel(
       id: _parseInt(json['id'] ?? json['stopId']),
-      companyId: _parseInt(json['fkIdCompany'] ?? json['companyId']),
+      driverId: _parseInt(json['fkIdDriver'] ?? json['driverId']),
       fkIdDistrict: _parseInt(json['fkIdDistrict'] ?? json['districtId']),
       name: _asString(json['name']),
       address: _asString(json['address']),
@@ -77,7 +77,7 @@ class CompanyStopModel {
       'Phone': phone,
       'Address': address,
       'Reference': reference,
-      'FkIdCompany': companyId.toString(),
+      'FkIdDriver': driverId.toString(),
       'FkIdDistrict': fkIdDistrict.toString(),
       'GoogleMapsUrl': gmaps,
       'Latitude': latitude.toString(),
@@ -85,7 +85,7 @@ class CompanyStopModel {
     };
   }
 
-  /// JSON body for `PUT /api/stops/{id}` (UpdateStopResource positional record).
+  /// JSON body for `PUT /api/stops/{id}` (UpdateStopResource).
   Map<String, dynamic> toUpdateJson() {
     final gmaps = googleMapsUrl.isNotEmpty
         ? googleMapsUrl
@@ -97,8 +97,7 @@ class CompanyStopModel {
       'name': name,
       'googleMapsUrl': gmaps,
       'imageUrl': imageUrl ?? '',
-      'phone': phone,
-      'fkIdCompany': companyId,
+      'fkIdDriver': driverId,
       'address': address,
       'reference': reference,
       'fkIdDistrict': fkIdDistrict,
@@ -109,7 +108,7 @@ class CompanyStopModel {
 
   CompanyStopModel copyWith({
     int? id,
-    int? companyId,
+    int? driverId,
     int? fkIdDistrict,
     String? name,
     String? address,
@@ -123,7 +122,7 @@ class CompanyStopModel {
   }) {
     return CompanyStopModel(
       id: id ?? this.id,
-      companyId: companyId ?? this.companyId,
+      driverId: driverId ?? this.driverId,
       fkIdDistrict: fkIdDistrict ?? this.fkIdDistrict,
       name: name ?? this.name,
       address: address ?? this.address,

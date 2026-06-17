@@ -12,12 +12,12 @@ import '../../data/models/district_option.dart';
 import '../providers/stop_provider.dart';
 
 class StopFormScreen extends StatefulWidget {
-  final int companyId;
+  final int driverId;
   final CompanyStopModel? stop;
 
   const StopFormScreen({
     super.key,
-    required this.companyId,
+    required this.driverId,
     this.stop,
   });
 
@@ -94,7 +94,7 @@ class _StopFormScreenState extends State<StopFormScreen> {
     final ok = await provider.save(
       CompanyStopModel(
         id: widget.stop?.id ?? 0,
-        companyId: widget.companyId,
+        driverId: widget.driverId,
         fkIdDistrict: _selectedDistrict!.id,
         districtLabel: _selectedDistrict!.name,
         name: _nameCtrl.text.trim(),

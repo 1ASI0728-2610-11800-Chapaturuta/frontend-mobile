@@ -48,9 +48,9 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> setCompanyId(int companyId) async {
+  Future<void> setDriverId(int driverId) async {
     final user = _currentUser;
-    if (user == null || user.companyId == companyId) return;
+    if (user == null || user.driverId == driverId) return;
 
     final updated = UserModel(
       id: user.id,
@@ -61,7 +61,7 @@ class UserProvider with ChangeNotifier {
       phone: user.phone,
       gender: user.gender,
       favoriteRoutes: user.favoriteRoutes,
-      companyId: companyId,
+      driverId: driverId,
     );
     await updateUser(updated);
   }

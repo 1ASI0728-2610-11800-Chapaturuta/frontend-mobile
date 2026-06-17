@@ -25,11 +25,11 @@ class StopProvider with ChangeNotifier {
 
   void setToken(String token) => apiService.setBearerToken(token);
 
-  Future<void> load(int companyId) async {
+  Future<void> load(int driverId) async {
     _setLoading(true);
     try {
       _tileUrl = await apiService.getMapTileUrl();
-      _stops = await apiService.getStops(companyId);
+      _stops = await apiService.getStops(driverId);
       _error = null;
     } catch (e) {
       _error = e.toString().replaceAll('Exception: ', '');

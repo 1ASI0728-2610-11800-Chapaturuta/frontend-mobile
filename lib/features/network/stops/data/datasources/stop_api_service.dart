@@ -36,9 +36,9 @@ class StopApiService {
     return headers;
   }
 
-  Future<List<CompanyStopModel>> getStops(int companyId) async {
+  Future<List<CompanyStopModel>> getStops(int driverId) async {
     final response = await http
-        .get(Uri.parse('$baseUrl/stops/company/$companyId'), headers: _jsonHeaders())
+        .get(Uri.parse('$baseUrl/stops/driver/$driverId'), headers: _jsonHeaders())
         .timeout(const Duration(seconds: 10));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);

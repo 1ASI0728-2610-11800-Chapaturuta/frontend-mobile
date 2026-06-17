@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/theme/app_theme.dart';
-import '../../../../company/presentation/providers/company_provider.dart';
+import '../../../../driver/presentation/providers/driver_provider.dart';
 import '../../data/models/company_route_model.dart';
 import '../providers/company_route_provider.dart';
 import 'company_route_form_screen.dart';
@@ -23,9 +23,9 @@ class _CompanyRoutesListScreenState extends State<CompanyRoutesListScreen> {
   }
 
   Future<void> _load() async {
-    final company = context.read<CompanyProvider>().company;
-    if (company == null) return;
-    await context.read<CompanyRouteProvider>().load(company.id);
+    final driver = context.read<DriverProvider>().driver;
+    if (driver == null) return;
+    await context.read<CompanyRouteProvider>().load(driver.id);
   }
 
   void _openForm([CompanyRouteModel? route]) {
@@ -61,7 +61,7 @@ class _CompanyRoutesListScreenState extends State<CompanyRoutesListScreen> {
     return Scaffold(
       backgroundColor: AppColors.carbon900,
       appBar: AppBar(
-        title: const Text('Rutas de empresa'),
+        title: const Text('Mis rutas'),
         actions: [
           IconButton(
             tooltip: 'Nueva ruta',

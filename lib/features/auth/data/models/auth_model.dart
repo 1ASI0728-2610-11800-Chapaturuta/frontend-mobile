@@ -28,9 +28,8 @@ class AuthUserModel extends AuthUser {
       final parsed = int.tryParse(value);
       if (parsed != null) return parsed;
       switch (value.toLowerCase()) {
-        case 'transportmanager':
-        case 'manager':
-          return 1;
+        case 'traveller':
+          return 0;
         case 'driver':
           return 2;
         case 'admin':

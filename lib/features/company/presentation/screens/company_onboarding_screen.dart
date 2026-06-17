@@ -73,7 +73,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
     if (ok) {
       final company = companyProvider.company;
       if (company != null) {
-        await context.read<UserProvider>().setCompanyId(company.id);
+        await context.read<UserProvider>().setDriverId(company.id);
       }
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(

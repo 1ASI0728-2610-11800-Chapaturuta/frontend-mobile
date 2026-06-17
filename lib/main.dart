@@ -14,9 +14,9 @@ import 'features/routes/presentation/providers/route_provider.dart';
 import 'features/profile/data/repositories/user_repository_impl.dart';
 import 'features/profile/presentation/providers/user_provider.dart';
 
-import 'features/company/data/datasources/company_api_service.dart';
-import 'features/company/data/repositories/company_repository_impl.dart';
-import 'features/company/presentation/providers/company_provider.dart';
+import 'features/driver/data/datasources/driver_api_service.dart';
+import 'features/driver/data/repositories/driver_repository_impl.dart';
+import 'features/driver/presentation/providers/driver_provider.dart';
 import 'features/main/presentation/screens/role_router_screen.dart';
 import 'features/network/routes/data/datasources/company_route_api_service.dart';
 import 'features/network/routes/presentation/providers/company_route_provider.dart';
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final routeApiService = RouteApiService();
-    final companyApiService = CompanyApiService();
+    final driverApiService = DriverApiService();
     final stopApiService = StopApiService();
     final companyRouteApiService = CompanyRouteApiService();
 
@@ -62,15 +62,15 @@ class MyApp extends StatelessWidget {
             return previousRouteProvider!;
           },
         ),
-        ChangeNotifierProxyProvider<AuthProvider, CompanyProvider>(
-          create: (context) => CompanyProvider(
-            repository: CompanyRepositoryImpl(apiService: companyApiService),
+        ChangeNotifierProxyProvider<AuthProvider, DriverProvider>(
+          create: (context) => DriverProvider(
+            repository: DriverRepositoryImpl(apiService: driverApiService),
           ),
-          update: (context, authProvider, previousCompanyProvider) {
+          update: (context, authProvider, previousDriverProvider) {
             if (authProvider.token != null) {
-              companyApiService.setBearerToken(authProvider.token!);
+              driverApiService.setBearerToken(authProvider.token!);
             }
-            return previousCompanyProvider!;
+            return previousDriverProvider!;
           },
         ),
         ChangeNotifierProxyProvider<AuthProvider, StopProvider>(
