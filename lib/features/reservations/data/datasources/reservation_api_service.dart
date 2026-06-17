@@ -38,19 +38,22 @@ class ReservationApiService {
     required String paymentMethod,
     required int availableSeats,
   }) async {
-    // Step 1: Create trip
+    final tripBody = <String, dynamic>{
+      'fkIdUser': userId,
+      'fkIdRoute': routeId,
+      'fkIdOriginStop': originStopId,
+      'fkIdDestinationStop': destinationStopId,
+      'price': price,
+      'availableSeats': availableSeats,
+    };
+    if (driverId > 0) {
+      tripBody['fkIdDriver'] = driverId;
+    }
+
     final tripResponse = await http.post(
       Uri.parse('$baseUrl/trips'),
       headers: _headers(),
-      body: json.encode({
-        'fkIdUser': userId,
-        'fkIdDriver': driverId,
-        'fkIdRoute': routeId,
-        'fkIdOriginStop': originStopId,
-        'fkIdDestinationStop': destinationStopId,
-        'price': price,
-        'availableSeats': availableSeats,
-      }),
+      body: json.encode(tripBody),
     ).timeout(const Duration(seconds: 15));
 
     if (tripResponse.statusCode != 200 && tripResponse.statusCode != 201) {

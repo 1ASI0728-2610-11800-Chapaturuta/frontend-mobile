@@ -18,6 +18,10 @@ class TransportRouteModel extends TransportRoute {
 
   factory TransportRouteModel.fromJson(Map<String, dynamic> json) {
     final parsedStops = _parseStops(json['stops']);
+    final topDriverId = _parseInt(json['driverId'] ?? json['fkIdDriver'] ?? json['fk_id_driver']);
+    final driverIdFromStops = topDriverId > 0
+        ? topDriverId
+        : _extractDriverIdFromStops(parsedStops);
     return TransportRouteModel(
       id: _parseInt(json['id']),
       name: _asString(json['name'])
@@ -28,12 +32,19 @@ class TransportRouteModel extends TransportRoute {
       distance: _formatMeters(json['distanceMeters'] ?? json['distance']),
       state: _asString(json['status']) ?? _asString(json['state']) ?? 'Active',
       polylineRoute: _asString(json['geometry']) ?? _asString(json['polylineRoute']),
-      driverId: _parseInt(json['driverId']),
+      driverId: driverIdFromStops,
       frequency: _parseInt(json['frequency']),
       stops: parsedStops,
       originAddress: _asString(json['originAddress']),
       destinationAddress: _asString(json['destinationAddress']),
     );
+  }
+
+  static int _extractDriverIdFromStops(List<RouteStop> stops) {
+    for (final stop in stops) {
+      if (stop.fkDriverId != null && stop.fkDriverId! > 0) return stop.fkDriverId!;
+    }
+    return 0;
   }
 
   static List<RouteStop> _parseStops(dynamic stops) {

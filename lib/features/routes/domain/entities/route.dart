@@ -4,6 +4,7 @@ class RouteStop {
   final String? address;
   final double? latitude;
   final double? longitude;
+  final int? fkDriverId;
 
   const RouteStop({
     required this.id,
@@ -11,6 +12,7 @@ class RouteStop {
     this.address,
     this.latitude,
     this.longitude,
+    this.fkDriverId,
   });
 
   factory RouteStop.fromJson(Map<String, dynamic> json) {
@@ -20,7 +22,16 @@ class RouteStop {
       address: json['address']?.toString(),
       latitude: _toDouble(json['latitude']),
       longitude: _toDouble(json['longitude']),
+      fkDriverId: _toInt(json['fk_driver_id'] ?? json['fkIdDriver'] ?? json['fkDriverId']),
     );
+  }
+
+  static int? _toInt(dynamic v) {
+    if (v == null) return null;
+    if (v is int) return v;
+    if (v is double) return v.toInt();
+    if (v is String) return int.tryParse(v);
+    return null;
   }
 
   static double? _toDouble(dynamic v) {
