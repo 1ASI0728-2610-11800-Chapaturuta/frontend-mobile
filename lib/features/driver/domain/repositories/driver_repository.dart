@@ -17,4 +17,5 @@ abstract class DriverRepository {
     required int vehicleCapacity,
     required String vehicleType,
   });
+  Future<Driver> toggleAvailability(int driverId);
 }

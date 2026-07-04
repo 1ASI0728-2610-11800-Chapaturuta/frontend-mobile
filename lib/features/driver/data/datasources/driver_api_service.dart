@@ -73,4 +73,15 @@ class DriverApiService {
     }
     throw Exception('Error al crear conductor: ${response.statusCode} ${response.body}');
   }
+
+  /// Flips the driver's availability. PATCH /v1/drivers/{id}/availability
+  Future<DriverModel> toggleAvailability(int driverId) async {
+    final response = await http
+        .patch(Uri.parse('$baseUrl/v1/drivers/$driverId/availability'), headers: _headers())
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode == 200) {
+      return DriverModel.fromJson(json.decode(response.body));
+    }
+    throw Exception('No se pudo cambiar la disponibilidad: ${response.statusCode}');
+  }
 }

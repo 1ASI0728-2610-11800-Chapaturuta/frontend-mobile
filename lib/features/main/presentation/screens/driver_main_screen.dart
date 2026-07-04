@@ -10,6 +10,7 @@ import '../../../network/routes/presentation/screens/company_routes_list_screen.
 import '../../../network/stops/presentation/screens/stops_list_screen.dart';
 import '../../../profile/presentation/providers/user_provider.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
+import '../../../trips/presentation/screens/driver_trips_screen.dart';
 
 class DriverMainScreen extends StatefulWidget {
   final bool skipBootstrap;
@@ -66,7 +67,8 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
     }
 
     final screens = [
-      const DriverHomeScreen(),
+      DriverHomeScreen(onOpenProfile: () => setState(() => _selectedIndex = 4)),
+      const DriverTripsScreen(),
       const StopsListScreen(),
       const CompanyRoutesListScreen(),
       const ProfileScreen(),
@@ -99,9 +101,10 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
           child: Row(
             children: [
               _navItem(0, Icons.dashboard_outlined, 'Inicio'),
-              _navItem(1, Icons.pin_drop_outlined, 'Paraderos'),
-              _navItem(2, Icons.alt_route_rounded, 'Rutas'),
-              _navItem(3, Icons.person_outline_rounded, 'Perfil'),
+              _navItem(1, Icons.directions_bus_rounded, 'Viajes'),
+              _navItem(2, Icons.pin_drop_outlined, 'Paraderos'),
+              _navItem(3, Icons.alt_route_rounded, 'Rutas'),
+              _navItem(4, Icons.person_outline_rounded, 'Perfil'),
             ],
           ),
         ),

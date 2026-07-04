@@ -84,11 +84,21 @@ class ReservationApiService {
     throw Exception('Error al crear reserva: ${resResponse.statusCode} ${resResponse.body}');
   }
 
-  Future<List<ReservationModel>> getByUser(int userId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/v1/reservations/by-user/$userId'),
-      headers: _headers(),
-    ).timeout(const Duration(seconds: 10));
+  Future<List<ReservationModel>> getByUser(int userId) =>
+      _list('$baseUrl/v1/reservations/by-user/$userId');
+
+  /// Reservations placed on a specific trip. GET /v1/reservations/by-trip/{tripId}
+  Future<List<ReservationModel>> getByTrip(int tripId) =>
+      _list('$baseUrl/v1/reservations/by-trip/$tripId');
+
+  /// Reservations across all trips assigned to a driver. GET /v1/reservations/by-driver/{driverId}
+  Future<List<ReservationModel>> getByDriver(int driverId) =>
+      _list('$baseUrl/v1/reservations/by-driver/$driverId');
+
+  Future<List<ReservationModel>> _list(String url) async {
+    final response = await http
+        .get(Uri.parse(url), headers: _headers())
+        .timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);

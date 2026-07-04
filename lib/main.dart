@@ -25,6 +25,12 @@ import 'features/network/stops/presentation/providers/stop_provider.dart';
 import 'features/reservations/data/datasources/reservation_api_service.dart';
 import 'features/reservations/presentation/providers/reservation_provider.dart';
 
+import 'features/trips/data/datasources/trip_api_service.dart';
+import 'features/trips/presentation/providers/trip_provider.dart';
+
+import 'features/tariffs/data/datasources/tariff_api_service.dart';
+import 'features/tariffs/presentation/providers/tariff_provider.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
@@ -40,6 +46,8 @@ class MyApp extends StatelessWidget {
     final stopApiService = StopApiService();
     final companyRouteApiService = CompanyRouteApiService();
     final reservationApiService = ReservationApiService();
+    final tripApiService = TripApiService();
+    final tariffApiService = TariffApiService();
 
     return MultiProvider(
       providers: [
@@ -107,6 +115,24 @@ class MyApp extends StatelessWidget {
               reservationApiService.setBearerToken(authProvider.token!);
             }
             return previousReservationProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, TripProvider>(
+          create: (context) => TripProvider(apiService: tripApiService),
+          update: (context, authProvider, previousTripProvider) {
+            if (authProvider.token != null) {
+              tripApiService.setBearerToken(authProvider.token!);
+            }
+            return previousTripProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, TariffProvider>(
+          create: (context) => TariffProvider(apiService: tariffApiService),
+          update: (context, authProvider, previousTariffProvider) {
+            if (authProvider.token != null) {
+              tariffApiService.setBearerToken(authProvider.token!);
+            }
+            return previousTariffProvider!;
           },
         ),
       ],

@@ -44,4 +44,9 @@ class DriverRepositoryImpl implements DriverRepository {
       vehicleType: vehicleType,
     );
   }
+
+  @override
+  Future<Driver> toggleAvailability(int driverId) {
+    return apiService.toggleAvailability(driverId);
+  }
 }

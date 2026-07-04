@@ -72,6 +72,22 @@ class DriverProvider with ChangeNotifier {
     }
   }
 
+  /// Flips availability on the backend and reflects the returned state. Returns success.
+  Future<bool> toggleAvailability() async {
+    final current = _driver;
+    if (current == null) return false;
+    try {
+      _driver = await repository.toggleAvailability(current.id);
+      _error = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
   void _setLoading(bool v) {
     _isLoading = v;
     notifyListeners();
