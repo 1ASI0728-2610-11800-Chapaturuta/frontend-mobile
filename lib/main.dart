@@ -46,6 +46,12 @@ import 'features/subscriptions/presentation/providers/subscription_provider.dart
 import 'features/discovery/data/datasources/assistant_api_service.dart';
 import 'features/discovery/presentation/providers/assistant_provider.dart';
 
+import 'features/collections/data/datasources/collection_api_service.dart';
+import 'features/collections/presentation/providers/collection_provider.dart';
+
+import 'features/notifications/data/datasources/notification_api_service.dart';
+import 'features/notifications/presentation/providers/notification_provider.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
@@ -68,6 +74,8 @@ class MyApp extends StatelessWidget {
     final ratingApiService = RatingApiService();
     final subscriptionApiService = SubscriptionApiService();
     final assistantApiService = AssistantApiService();
+    final collectionApiService = CollectionApiService();
+    final notificationApiService = NotificationApiService();
 
     return MultiProvider(
       providers: [
@@ -198,6 +206,24 @@ class MyApp extends StatelessWidget {
               assistantApiService.setBearerToken(authProvider.token!);
             }
             return previousAssistantProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, CollectionProvider>(
+          create: (context) => CollectionProvider(apiService: collectionApiService),
+          update: (context, authProvider, previousCollectionProvider) {
+            if (authProvider.token != null) {
+              collectionApiService.setBearerToken(authProvider.token!);
+            }
+            return previousCollectionProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, NotificationProvider>(
+          create: (context) => NotificationProvider(apiService: notificationApiService),
+          update: (context, authProvider, previousNotificationProvider) {
+            if (authProvider.token != null) {
+              notificationApiService.setBearerToken(authProvider.token!);
+            }
+            return previousNotificationProvider!;
           },
         ),
       ],

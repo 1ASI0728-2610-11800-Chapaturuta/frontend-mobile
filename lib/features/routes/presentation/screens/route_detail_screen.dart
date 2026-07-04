@@ -4,6 +4,9 @@ import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/route.dart';
 import '../providers/route_provider.dart';
 import '../../../reservations/presentation/screens/reservation_form_screen.dart';
+import '../../../collections/presentation/providers/collection_provider.dart';
+import '../../../collections/data/models/collection_model.dart';
+import '../../../profile/presentation/providers/user_provider.dart';
 
 class RouteDetailScreen extends StatefulWidget {
   final String routeId;
@@ -30,6 +33,111 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
       route = loaded;
       isLoading = false;
     });
+  }
+
+  /// Lets the user save this route into one of their collections (or a new one).
+  Future<void> _saveToCollection(TransportRoute route) async {
+    final rawId = context.read<UserProvider>().currentUser?.id;
+    final userId = rawId == null ? null : int.tryParse(rawId);
+    if (userId == null) {
+      _snack('Debes iniciar sesión', isError: true);
+      return;
+    }
+    final provider = context.read<CollectionProvider>();
+    await provider.load(userId);
+    if (!mounted) return;
+
+    final selected = await showModalBottomSheet<CollectionModel>(
+      context: context,
+      backgroundColor: AppColors.carbon800,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Guardar en colección',
+                  style: TextStyle(color: AppColors.carbon50, fontWeight: FontWeight.w700, fontSize: 16)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.add_rounded, color: AppColors.gold500),
+              title: const Text('Crear nueva colección', style: TextStyle(color: AppColors.gold500)),
+              onTap: () => Navigator.pop(
+                  ctx,
+                  CollectionModel(
+                      id: -1, name: '', fkIdUser: 0, createdAt: DateTime.now(), itemCount: 0)),
+            ),
+            const Divider(height: 1, color: AppColors.carbon700),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: provider.collections
+                    .map((c) => ListTile(
+                          leading: const Icon(Icons.folder_rounded, color: AppColors.gold500),
+                          title: Text(c.name, style: const TextStyle(color: AppColors.carbon100)),
+                          subtitle: Text('${c.itemCount} ruta(s)',
+                              style: const TextStyle(color: AppColors.carbon400)),
+                          onTap: () => Navigator.pop(ctx, c),
+                        ))
+                    .toList(),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+
+    if (selected == null || !mounted) return;
+
+    var collectionId = selected.id;
+    // Sentinel id -1 => user chose "create new".
+    if (collectionId == -1) {
+      final name = await _newCollectionName();
+      if (name == null || name.isEmpty || !mounted) return;
+      final created = await provider.create(name, userId);
+      if (!created || !mounted) {
+        _snack(provider.error ?? 'No se pudo crear la colección', isError: true);
+        return;
+      }
+      collectionId = provider.collections.last.id;
+    }
+
+    final error = await provider.addRoute(collectionId, route.id);
+    if (!mounted) return;
+    _snack(error ?? 'Ruta guardada en la colección', isError: error != null);
+  }
+
+  Future<String?> _newCollectionName() {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.carbon800,
+        title: const Text('Nueva colección', style: TextStyle(color: AppColors.carbon50)),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: AppColors.carbon100),
+          decoration: const InputDecoration(labelText: 'Nombre'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Crear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _snack(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: isError ? AppColors.danger : AppColors.success),
+    );
   }
 
   @override
@@ -306,6 +414,20 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                         ),
                         icon: const Icon(Icons.confirmation_num_rounded, size: 20),
                         label: const Text('Reservar viaje', style: TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _saveToCollection(route!),
+                      icon: const Icon(Icons.bookmark_add_outlined, size: 18),
+                      label: const Text('Guardar en colección'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.gold500,
+                        side: const BorderSide(color: AppColors.gold500),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
                   ),

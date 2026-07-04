@@ -10,6 +10,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../trips/presentation/screens/trip_history_screen.dart';
 import '../../../subscriptions/presentation/screens/subscriptions_screen.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -171,7 +172,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildMenuTile(
                         icon: Icons.notifications_outlined,
                         title: 'Notificaciones',
-                        onTap: () {},
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                        ),
                       ),
                       const Divider(height: 1, indent: 56),
                       _buildMenuTile(
