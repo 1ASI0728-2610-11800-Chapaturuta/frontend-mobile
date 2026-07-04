@@ -1,47 +1,73 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/rating.dart';
-import '../../domain/repositories/rating_repository.dart';
+import '../../data/datasources/rating_api_service.dart';
+import '../../data/models/rating_model.dart';
 
-class RatingProvider extends ChangeNotifier {
-  final RatingRepository repository;
+/// Handles submitting a rating for a driver after a completed trip, plus reading a
+/// driver's ratings and summary.
+class RatingProvider with ChangeNotifier {
+  final RatingApiService apiService;
 
-  RatingProvider({required this.repository});
+  RatingProvider({required this.apiService});
 
-  List<Rating> _ratings = [];
+  List<RatingModel> _driverRatings = [];
+  RatingSummary? _summary;
+  bool _isSubmitting = false;
   bool _isLoading = false;
   String? _error;
 
-  List<Rating> get ratings => _ratings;
+  List<RatingModel> get driverRatings => _driverRatings;
+  RatingSummary? get summary => _summary;
+  bool get isSubmitting => _isSubmitting;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  double get averageScore {
-    if (_ratings.isEmpty) return 0;
-    return _ratings.map((r) => r.score).reduce((a, b) => a + b) / _ratings.length;
+  void setToken(String token) => apiService.setToken(token);
+
+  Future<bool> submit({
+    required int fkIdUser,
+    required int fkIdDriver,
+    required int fkIdTrip,
+    required int score,
+    String? comment,
+  }) async {
+    _isSubmitting = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await apiService.create(
+        fkIdUser: fkIdUser,
+        fkIdDriver: fkIdDriver,
+        fkIdTrip: fkIdTrip,
+        score: score,
+        comment: comment,
+      );
+      _isSubmitting = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      _isSubmitting = false;
+      notifyListeners();
+      return false;
+    }
   }
 
-  Future<void> loadRatings(int routeId) async {
+  Future<void> loadForDriver(int driverId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
-      _ratings = await repository.getRatingsForRoute(routeId);
+      final results = await Future.wait([
+        apiService.getByDriver(driverId),
+        apiService.getDriverSummary(driverId),
+      ]);
+      _driverRatings = results[0] as List<RatingModel>;
+      _summary = results[1] as RatingSummary?;
     } catch (e) {
-      _error = e.toString();
+      _error = e.toString().replaceAll('Exception: ', '');
     } finally {
       _isLoading = false;
       notifyListeners();
-    }
-  }
-
-  Future<bool> submitRating({required int routeId, required double score, String? comment}) async {
-    try {
-      final rating = await repository.createRating(routeId: routeId, score: score, comment: comment);
-      _ratings = [rating, ..._ratings];
-      notifyListeners();
-      return true;
-    } catch (_) {
-      return false;
     }
   }
 }

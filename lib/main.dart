@@ -31,6 +31,21 @@ import 'features/trips/presentation/providers/trip_provider.dart';
 import 'features/tariffs/data/datasources/tariff_api_service.dart';
 import 'features/tariffs/presentation/providers/tariff_provider.dart';
 
+import 'features/payments/data/datasources/payment_api_service.dart';
+import 'features/payments/presentation/providers/payment_provider.dart';
+
+import 'features/discovery/data/datasources/discovery_api_service.dart';
+import 'features/discovery/presentation/providers/discovery_provider.dart';
+
+import 'features/ratings/data/datasources/rating_api_service.dart';
+import 'features/ratings/presentation/providers/rating_provider.dart';
+
+import 'features/subscriptions/data/datasources/subscription_api_service.dart';
+import 'features/subscriptions/presentation/providers/subscription_provider.dart';
+
+import 'features/discovery/data/datasources/assistant_api_service.dart';
+import 'features/discovery/presentation/providers/assistant_provider.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
@@ -48,6 +63,11 @@ class MyApp extends StatelessWidget {
     final reservationApiService = ReservationApiService();
     final tripApiService = TripApiService();
     final tariffApiService = TariffApiService();
+    final paymentApiService = PaymentApiService();
+    final discoveryApiService = DiscoveryApiService();
+    final ratingApiService = RatingApiService();
+    final subscriptionApiService = SubscriptionApiService();
+    final assistantApiService = AssistantApiService();
 
     return MultiProvider(
       providers: [
@@ -133,6 +153,51 @@ class MyApp extends StatelessWidget {
               tariffApiService.setBearerToken(authProvider.token!);
             }
             return previousTariffProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, PaymentProvider>(
+          create: (context) => PaymentProvider(apiService: paymentApiService),
+          update: (context, authProvider, previousPaymentProvider) {
+            if (authProvider.token != null) {
+              paymentApiService.setBearerToken(authProvider.token!);
+            }
+            return previousPaymentProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, DiscoveryProvider>(
+          create: (context) => DiscoveryProvider(apiService: discoveryApiService),
+          update: (context, authProvider, previousDiscoveryProvider) {
+            if (authProvider.token != null) {
+              discoveryApiService.setBearerToken(authProvider.token!);
+            }
+            return previousDiscoveryProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, RatingProvider>(
+          create: (context) => RatingProvider(apiService: ratingApiService),
+          update: (context, authProvider, previousRatingProvider) {
+            if (authProvider.token != null) {
+              ratingApiService.setToken(authProvider.token!);
+            }
+            return previousRatingProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, SubscriptionProvider>(
+          create: (context) => SubscriptionProvider(apiService: subscriptionApiService),
+          update: (context, authProvider, previousSubscriptionProvider) {
+            if (authProvider.token != null) {
+              subscriptionApiService.setBearerToken(authProvider.token!);
+            }
+            return previousSubscriptionProvider!;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, AssistantProvider>(
+          create: (context) => AssistantProvider(apiService: assistantApiService),
+          update: (context, authProvider, previousAssistantProvider) {
+            if (authProvider.token != null) {
+              assistantApiService.setBearerToken(authProvider.token!);
+            }
+            return previousAssistantProvider!;
           },
         ),
       ],

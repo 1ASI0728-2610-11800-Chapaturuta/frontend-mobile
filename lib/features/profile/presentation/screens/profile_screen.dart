@@ -8,6 +8,8 @@ import 'edit_profile_screen.dart';
 import 'favorites_screen.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../trips/presentation/screens/trip_history_screen.dart';
+import '../../../subscriptions/presentation/screens/subscriptions_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -145,13 +147,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildMenuTile(
                         icon: Icons.history_rounded,
                         title: 'Historial de viajes',
-                        onTap: () {},
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const TripHistoryScreen()),
+                        ),
                       ),
                       const Divider(height: 1, indent: 56),
                       _buildMenuTile(
                         icon: Icons.star_rounded,
                         title: 'Mis calificaciones',
                         onTap: () {},
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      _buildMenuTile(
+                        icon: Icons.workspace_premium_rounded,
+                        title: 'Planes y suscripción',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const SubscriptionsScreen()),
+                        ),
                       ),
                       const Divider(height: 1, indent: 56),
                       _buildMenuTile(

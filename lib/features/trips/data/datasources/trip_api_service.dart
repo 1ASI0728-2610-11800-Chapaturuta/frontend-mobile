@@ -58,6 +58,18 @@ class TripApiService {
     return _parseHistoryList(response, 'No se pudo cargar el historial');
   }
 
+  /// Single trip aggregate (carries fkIdDriver, needed to rate the driver). GET /trips/{id}
+  Future<TripSummaryModel?> getById(int tripId) async {
+    final response = await http
+        .get(Uri.parse('$baseUrl/trips/$tripId'), headers: _headers())
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode == 200) {
+      return TripSummaryModel.fromJson(json.decode(response.body));
+    }
+    if (response.statusCode == 404) return null;
+    throw Exception('Error al cargar el viaje: ${response.statusCode}');
+  }
+
   // ── Driver-facing writes ───────────────────────────────────────────────────
 
   /// Driver publishes a shared trip with seat capacity. POST /trips/publish

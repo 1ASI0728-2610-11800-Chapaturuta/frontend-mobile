@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../payments/presentation/screens/payment_screen.dart';
 import '../../../profile/presentation/providers/user_provider.dart';
 import '../../../routes/domain/entities/route.dart';
 import '../providers/reservation_provider.dart';
@@ -85,7 +86,33 @@ class _ReservationFormScreenState extends State<ReservationFormScreen> {
     if (!mounted) return;
     setState(() => _submitting = false);
 
-    if (result != null) {
+    if (result == null) {
+      _showSnack(provider.error ?? 'Error al crear reserva');
+      return;
+    }
+
+    // The reservation already registered a Pending payment (its fkIdPayment); take the
+    // passenger to the (simulated) checkout to confirm it, which also confirms the reservation.
+    final total = widget.route.price * _seats;
+    if (result.fkIdPayment != null) {
+      final paid = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => PaymentScreen(
+            paymentId: result.fkIdPayment!,
+            amount: total,
+            method: _paymentMethod,
+          ),
+        ),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(paid == true ? 'Reserva pagada y confirmada' : 'Reserva creada (pago pendiente)'),
+          backgroundColor: paid == true ? AppColors.success : AppColors.warning,
+        ),
+      );
+      Navigator.pop(context, true);
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Reserva creada exitosamente'),
@@ -93,8 +120,6 @@ class _ReservationFormScreenState extends State<ReservationFormScreen> {
         ),
       );
       Navigator.pop(context, true);
-    } else {
-      _showSnack(provider.error ?? 'Error al crear reserva');
     }
   }
 
