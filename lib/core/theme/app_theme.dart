@@ -177,6 +177,11 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
       ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColors.gold500,
+        selectionColor: AppColors.gold500.withValues(alpha: 0.22),
+        selectionHandleColor: AppColors.gold500,
+      ),
     );
   }
 

@@ -224,7 +224,7 @@ class _DriverOnboardingScreenState extends State<DriverOnboardingScreen> {
               isExpanded: true,
               dropdownColor: AppColors.carbon800,
               iconEnabledColor: AppColors.gold400,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: const TextStyle(color: AppColors.carbon100, fontSize: 14),
               items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
               onChanged: onChanged,
             ),

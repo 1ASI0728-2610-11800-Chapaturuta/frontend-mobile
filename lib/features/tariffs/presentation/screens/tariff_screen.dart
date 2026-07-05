@@ -205,6 +205,7 @@ class _TariffScreenState extends State<TariffScreen> {
             TextFormField(
               controller: _durationMinutes,
               keyboardType: TextInputType.number,
+              style: const TextStyle(color: AppColors.carbon50),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: const InputDecoration(labelText: 'Minutos estimados'),
             ),
@@ -280,6 +281,7 @@ class _TariffScreenState extends State<TariffScreen> {
     return TextFormField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      style: const TextStyle(color: AppColors.carbon50),
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
       decoration: InputDecoration(labelText: label, prefixText: 'S/ '),
       validator: (v) {

@@ -195,7 +195,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       isExpanded: true,
                       dropdownColor: AppColors.carbon800,
                       iconEnabledColor: AppColors.gold400,
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      style: const TextStyle(color: AppColors.carbon100, fontSize: 14),
                       items: const [
                         DropdownMenuItem(value: 0, child: Text('Pasajero')),
                         DropdownMenuItem(value: 2, child: Text('Conductor')),
@@ -266,7 +266,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       controller: controller,
       obscureText: obscure,
       keyboardType: keyboard,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: AppColors.carbon100),
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
