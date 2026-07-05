@@ -67,7 +67,7 @@ class StopCard extends StatelessWidget {
                     stop.districtLabel,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: AppColors.gold300, fontSize: 11),
+                    style: const TextStyle(color: AppColors.gold600, fontSize: 11),
                   ),
                 ],
               ],

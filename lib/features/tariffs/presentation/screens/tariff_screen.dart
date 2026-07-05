@@ -326,7 +326,7 @@ class _TariffScreenState extends State<TariffScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppColors.danger : AppColors.carbon800,
+        backgroundColor: isError ? AppColors.danger : AppColors.carbon50,
       ),
     );
   }

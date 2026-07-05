@@ -63,7 +63,7 @@ class _RouteCardState extends State<RouteCard> with SingleTickerProviderStateMix
               border: Border.all(color: AppColors.carbon700, width: 1),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha:0.3),
+                  color: AppColors.gold600.withValues(alpha:0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),

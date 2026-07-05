@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(authProvider.error ?? 'Error al iniciar sesión'),
-            backgroundColor: AppColors.carbon800,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -177,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha:0.4),
+                              color: AppColors.gold600.withValues(alpha:0.12),
                               blurRadius: 24,
                               offset: const Offset(0, 8),
                             ),
@@ -296,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   },
                                   child: const Text(
                                     '¿No tienes cuenta? Regístrate',
-                                    style: TextStyle(color: AppColors.gold300, fontSize: 14),
+                                    style: TextStyle(color: AppColors.gold600, fontSize: 14, fontWeight: FontWeight.w600),
                                   ),
                                 ),
                               ),

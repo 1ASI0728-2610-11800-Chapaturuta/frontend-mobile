@@ -233,7 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text(
                       '¿Ya tienes cuenta? Inicia sesión',
-                      style: TextStyle(color: AppColors.gold300, fontSize: 14),
+                      style: TextStyle(color: AppColors.gold600, fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),

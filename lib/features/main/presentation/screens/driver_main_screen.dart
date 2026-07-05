@@ -88,7 +88,7 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
         border: const Border(top: BorderSide(color: AppColors.carbon700)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
+            color: AppColors.gold600.withValues(alpha: 0.10),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),

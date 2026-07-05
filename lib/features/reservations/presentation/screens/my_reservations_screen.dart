@@ -181,7 +181,7 @@ class _ReservationCard extends StatelessWidget {
       case 'Refunded':
         return AppColors.danger;
       case 'Completed':
-        return const Color(0xFF60A5FA);
+        return AppColors.info;
       default:
         return AppColors.gold500;
     }

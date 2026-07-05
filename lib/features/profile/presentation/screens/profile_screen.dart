@@ -205,18 +205,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     switch (user.role) {
       case 2:
-        bgColor = const Color(0xFF1A3A2A);
-        textColor = const Color(0xFF4ADE80);
+        bgColor = AppColors.success.withValues(alpha: 0.12);
+        textColor = AppColors.success;
         icon = Icons.directions_car_rounded;
         break;
       case 3:
-        bgColor = const Color(0xFF2A1A3A);
-        textColor = const Color(0xFFBB86FC);
+        bgColor = AppColors.info.withValues(alpha: 0.12);
+        textColor = AppColors.info;
         icon = Icons.admin_panel_settings_rounded;
         break;
       default:
         bgColor = AppColors.gold500.withValues(alpha: 0.15);
-        textColor = AppColors.gold400;
+        textColor = AppColors.gold600;
         icon = Icons.person_rounded;
     }
 
